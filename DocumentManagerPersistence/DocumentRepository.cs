@@ -56,7 +56,7 @@ public class DocumentRepository
     {
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
-            var metadataList = db.Metadatas.Where(dao => dao.TextContent.Contains(search)).Include(dao => dao.Tags)
+            var metadataList = db.Metadatas.Where(dao => EF.Functions.Like(dao.TextContent, $"%{search}%")).Include(dao => dao.Tags)
                 .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
