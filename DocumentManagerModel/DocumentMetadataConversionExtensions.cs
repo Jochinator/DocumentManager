@@ -10,8 +10,8 @@ public static class DocumentMetadataConversionExtensions
         {
             Id = dao.Id,
             Checked = dao.Checked,
-            Date = dao.Date,
-            Tags = dao.Tags.Select(tagDao => tagDao.value),
+            Date = dao.Date.ToLocalTime(),
+            Tags = dao.Tags.Select(tagDao => tagDao.ToDto()),
             Title = dao.Title,
             ContentType = dao.ContentType,
             FileExtension = dao.FileExtension,
@@ -20,20 +20,49 @@ public static class DocumentMetadataConversionExtensions
         };
     }
 
-    public static DocumentMetadataDao ToDao(this DocumentMetadataDto dto, IQueryable<TagDao> exisitingTags)
+    public static DocumentMetadataDao ToDao(this DocumentMetadataDto dto, string textContent)
     {
-        var tags = dto.Tags.Select(tag =>
-            exisitingTags.FirstOrDefault(dao => dao.value == tag) ?? new TagDao { value = tag });
-        return new DocumentMetadataDao{
+        return new DocumentMetadataDao
+        {
             Id = dto.Id,
             Checked = dto.Checked,
             Date = dto.Date,
-            Tags = tags.ToList(),
+            Tags = dto.Tags.Select(tagDto => tagDto.ToDao()).ToList(),
             Title = dto.Title,
             ContentType = dto.ContentType,
             FileExtension = dto.FileExtension,
             FilePath = dto.FilePath,
-            SenderName = dto.SenderName
+            SenderName = dto.SenderName,
+            TextContent = textContent
         };
+    }
+    
+    public static void UpdateFromDao(this DocumentMetadataDao persistedDao, DocumentMetadataDao newDao)
+    {
+        if (persistedDao.Checked != newDao.Checked)
+        {
+            persistedDao.Checked = newDao.Checked;
+        }
+
+        if (persistedDao.Date != newDao.Date)
+        {
+            persistedDao.Date = newDao.Date;
+        }
+
+        if (persistedDao.Title != newDao.Title)
+        {
+            persistedDao.Title = newDao.Title;
+        }
+
+        if (persistedDao.SenderName != newDao.SenderName)
+        {
+            persistedDao.SenderName = newDao.SenderName;
+        }
+
+        var deletedTags =
+            persistedDao.Tags.Where(existingTag => !newDao.Tags.Exists(newTag => newTag.Id == existingTag.Id));
+        var newTags = newDao.Tags.Where(newTag => !persistedDao.Tags.Exists(existingTag => newTag.Id == existingTag.Id));
+        persistedDao.Tags.RemoveAll(dao => deletedTags.Contains(dao));
+        persistedDao.Tags.AddRange(newTags);
     }
 }

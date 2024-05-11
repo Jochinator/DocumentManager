@@ -6,6 +6,8 @@ public class DocumentMetadataDao
 
     public string Title { get; set; } = "";
 
+    public string TextContent { get; set; }
+
     public DateTime Date { get; set; } = DateTime.Now;
 
     public List<TagDao> Tags { get; set; } = new List<TagDao>();

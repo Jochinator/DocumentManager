@@ -1,4 +1,5 @@
 using DocumentManager;
+using DocumentManagerModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocumentManagerPersistence;

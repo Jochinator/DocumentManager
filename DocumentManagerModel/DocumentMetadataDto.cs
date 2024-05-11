@@ -1,3 +1,5 @@
+using DocumentManagerModel;
+
 namespace DocumentManager;
 
 public class DocumentMetadataDto
@@ -8,7 +10,7 @@ public class DocumentMetadataDto
 
     public DateTime Date { get; set; } = DateTime.Now;
 
-    public IEnumerable<string> Tags { get; set; } = new List<string>();
+    public IEnumerable<TagDto> Tags { get; set; } = new List<TagDto>();
 
     public string SenderName { get; set; } = "";
 

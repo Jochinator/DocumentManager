@@ -45,6 +45,10 @@ namespace DocumentManagerPersistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TextContent")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -60,30 +64,46 @@ namespace DocumentManagerPersistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("DocumentMetadataDaoId")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsManualOnly")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("value")
+                    b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DocumentMetadataDaoId");
-
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("DocumentManager.TagDao", b =>
+            modelBuilder.Entity("DocumentMetadataDaoTagDao", b =>
                 {
-                    b.HasOne("DocumentManager.DocumentMetadataDao", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("DocumentMetadataDaoId");
+                    b.Property<Guid>("MetadatasId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TagsId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MetadatasId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("DocumentMetadataDaoTagDao");
                 });
 
-            modelBuilder.Entity("DocumentManager.DocumentMetadataDao", b =>
+            modelBuilder.Entity("DocumentMetadataDaoTagDao", b =>
                 {
-                    b.Navigation("Tags");
+                    b.HasOne("DocumentManager.DocumentMetadataDao", null)
+                        .WithMany()
+                        .HasForeignKey("MetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DocumentManager.TagDao", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DocumentManagerModel\DocumentManagerModel.csproj" />
+      <ProjectReference Include="..\DocumentManager.TextExtractor\DocumentManager.TextExtractor.csproj" />
     </ItemGroup>
 
 </Project>

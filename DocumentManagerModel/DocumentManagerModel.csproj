@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DocumentManager.TextExtractor\DocumentManager.TextExtractor.csproj" />
+    </ItemGroup>
+
 </Project>

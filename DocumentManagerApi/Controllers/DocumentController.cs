@@ -1,24 +1,30 @@
+using DocumentManager;
+using DocumentManager.DocumentProcessor;
 using DocumentManagerPersistence;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DocumentManager.Controllers;
+namespace DocumentManagerApi.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class DocumentController : ControllerBase
 {
     private readonly ILogger<DocumentController> _logger;
     private readonly DocumentRepository _repository;
+    private readonly DocumentProcessor _documentProcessor;
 
-    public DocumentController(ILogger<DocumentController> logger, DocumentRepository repository)
+    public DocumentController(ILogger<DocumentController> logger, DocumentRepository repository, DocumentProcessor documentProcessor)
     {
         _logger = logger;
         _repository = repository;
+        _documentProcessor = documentProcessor;
     }
 
     [HttpGet(Name = "Documents")]
-    public IEnumerable<DocumentMetadataDto> GetDocuments()
+    public IEnumerable<DocumentMetadataDto> GetDocuments([FromQuery(Name = "search")] string? search = "")
     {
+        if (search != null && search.Length > 0)
+            return _repository.GetDocuments(search);
         return _repository.GetDocuments();
     }
     
@@ -29,16 +35,15 @@ public class DocumentController : ControllerBase
     }
 
     [HttpPost(Name = "Documents")]
-    public void ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged)
+    public Guid ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged)
     {
-        _repository.CreateDocument(new DocumentMetadataDto
+        return _documentProcessor.CreateDocument(new DocumentMetadataDto
         {
             Title = Path.GetFileNameWithoutExtension(file.FileName),
             Date = DateTime.Parse(lastChanged),
             FileExtension = Path.GetExtension(file.FileName),
             ContentType = file.ContentType
-        }, new DocumentFile(Path.GetExtension(file.FileName), file.OpenReadStream()));
-        return;
+        }, new DocumentFile(Path.GetExtension(file.FileName), file.OpenReadStream())).Id;
     }
     
     [HttpPut("{id}")]

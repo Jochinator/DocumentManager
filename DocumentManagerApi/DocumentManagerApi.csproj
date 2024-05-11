@@ -4,7 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>DocumentManager</RootNamespace>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DocumentManager.DocumentProcessor\DocumentManager.DocumentProcessor.csproj" />
       <ProjectReference Include="..\DocumentManagerModel\DocumentManagerModel.csproj" />
       <ProjectReference Include="..\DocumentManagerPersistence\DocumentManagerPersistence.csproj" />
     </ItemGroup>
@@ -19,5 +20,12 @@
     <ItemGroup>
       <Folder Include="wwwroot\documents" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="wwwroot\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+    
 
 </Project>

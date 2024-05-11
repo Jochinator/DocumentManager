@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish DocumentManager Linux" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" platform="Any CPU" runtime="linux-arm64" self_contained="true" target_folder="$PROJECT_DIR$/DocumentManagerApi/bin/Release/net6.0/linux-arm64/publish" target_framework="net6.0" uuid_high="-4749940767750141283" uuid_low="-5569116143026537915" />
+    <method v="2">
+      <option name="NpmBeforeRunTask" enabled="true">
+        <package-json value="$PROJECT_DIR$/../DocumentManagerFrontendAngular/DocumentManagerFrontend/package.json" />
+        <command value="run" />
+        <scripts>
+          <script value="build" />
+        </scripts>
+        <arguments value="-- --output-path ../../DocumentManager/DocumentManagerApi/wwwroot" />
+        <node-interpreter value="project" />
+        <envs />
+      </option>
+    </method>
+  </configuration>
+</component>

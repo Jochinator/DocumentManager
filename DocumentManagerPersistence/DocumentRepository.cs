@@ -6,62 +6,82 @@ namespace DocumentManagerPersistence;
 
 public class DocumentRepository
 {
-    private readonly string baseFilePath = "wwwroot";
-    private readonly string documentFolder = "documents";
+    private readonly string _dataRootFolder;
+    private readonly string _documentFolder;
+    private readonly string _dbPath;
 
-    public DocumentRepository()
+    public DocumentRepository(PersistenceDefinitions definitions)
     {
+        _dataRootFolder = definitions.DataRootFolder;
+        _documentFolder = definitions.DocumentFolder;
+        _dbPath = GetCompleteFilePath("Documents.db");
     }
 
-    public DocumentMetadataDto CreateDocument(DocumentMetadataDto metadata, DocumentFile file)
+    public void Init()
     {
-        metadata.Id = Guid.NewGuid();
-        var filePath = Path.Combine(baseFilePath, documentFolder,  metadata.Id.ToString() + file.FileExtension);
-        metadata.FilePath = string.Join("/", documentFolder, metadata.Id.ToString() + file.FileExtension);
-        using (var db = new DocumentContext())
+        using var db = new DocumentContext { DbPath = _dbPath };
+        db.Database.Migrate();
+    }
+
+    public DocumentMetadataDao CreateDocument(DocumentMetadataDao metadata)
+    {
+        using (var db = new DocumentContext{ DbPath = _dbPath })
         {
-            db.Database.EnsureCreated();
-            var exisitingTags = db.Tags.Where(dao => metadata.Tags.Contains(dao.value));
-            db.Metadatas.Add(metadata.ToDao(exisitingTags));
+            db.Metadatas.Add(metadata);
+            foreach (var tagDao in metadata.Tags.Where(dao => dao.Id != default))
+            {
+                db.Tags.Attach(tagDao);
+            }
             db.SaveChanges();
-        }
-        
-        using (var fileStream = File.Create(filePath))
-        {
-            file.Stream.Seek(0, SeekOrigin.Begin);
-            file.Stream.CopyTo(fileStream);
         }
 
         return metadata;
     }
 
+    private string GetCompleteFilePath(string filePath)
+    {
+        return Path.Combine(_dataRootFolder, filePath);
+    }
+
     public IEnumerable<DocumentMetadataDto> GetDocuments()
     {
-        using (var db = new DocumentContext())
-        {
-            db.Database.EnsureCreated();
+        using (var db = new DocumentContext{ DbPath = _dbPath })
+        { 
             var metadataList = db.Metadatas.Include(dao => dao.Tags).ToList();
+            return metadataList.Select(dao => dao.ToDto());
+        }
+    }
+
+    public IEnumerable<DocumentMetadataDto> GetDocuments(string search)
+    {
+        using (var db = new DocumentContext { DbPath = _dbPath })
+        {
+            var metadataList = db.Metadatas.Where(dao => dao.TextContent.Contains(search)).Include(dao => dao.Tags)
+                .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
     }
 
     public DocumentMetadataDto GetDocument(Guid id)
     {
-        using (var db = new DocumentContext())
+        using (var db = new DocumentContext{ DbPath = _dbPath })
         {
-            db.Database.EnsureCreated();
             var metadata = db.Metadatas.Include(dao => dao.Tags).Single(data => data.Id == id);
+            Directory.CreateDirectory(Path.Combine("wwwroot", "documents"));
+            File.Copy(GetCompleteFilePath(metadata.FilePath), Path.Combine("wwwroot", "documents", metadata.Id + metadata.FileExtension), true);
             return metadata.ToDto();
         }
     }
 
     public DocumentMetadataDto UpdateMetadata(DocumentMetadataDto metadata)
     {
-        using (var db = new DocumentContext())
+        using (var db = new DocumentContext{ DbPath = _dbPath })
         {
-            db.Database.EnsureCreated();
-            var exisitingTags = db.Tags.Where(dao => metadata.Tags.Contains(dao.value));
-            db.Metadatas.Update(metadata.ToDao(exisitingTags));
+            var persistedDao = db.Metadatas.Include(dao => dao.Tags).Single(dao => dao.Id ==  metadata.Id);
+
+            var newDao = metadata.ToDao("");
+            persistedDao.UpdateFromDao(newDao);
+
             db.SaveChanges();
             return metadata;
         }
