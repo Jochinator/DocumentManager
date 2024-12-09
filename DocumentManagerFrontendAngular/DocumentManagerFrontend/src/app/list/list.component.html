@@ -1,0 +1,43 @@
+<mat-form-field class="search-form-field">
+  <mat-label>Volltextsuche</mat-label>
+  <input matInput type="text" [(ngModel)]="searchString" (ngModelChange)="initiateSearch(searchString)">
+  <button *ngIf="searchString" matSuffix mat-icon-button aria-label="Clear" (click)="searchString=''">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-form-field>
+
+<p-table [value]="metadatas"
+         [rowHover]="true"
+         [rows]="12"
+         [showCurrentPageReport]="true"
+         [rowsPerPageOptions]="[10,25,50]"
+         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+         [filterDelay]="0"
+         [globalFilterFields]="['Kontakt','document.title','date']"
+         [resizableColumns]="true" styleClass="p-datatable-gridlines"
+         [paginator]="true">
+  <ng-template pTemplate="caption">
+    <div class="table-header">
+      List of Documents
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="senderName" pResizableColumn> Kontakt <p-sortIcon field="senderName"></p-sortIcon> <p-columnFilter type="text" field="senderName" display=""></p-columnFilter></th>
+      <th pSortableColumn="title" pResizableColumn>Titel <p-sortIcon field="title"></p-sortIcon> <p-columnFilter type="text" field="title" display="menu"></p-columnFilter></th>
+      <th pSortableColumn="date" pResizableColumn>Datum <p-sortIcon field="date"></p-sortIcon> <p-columnFilter type="date" field="date" display="menu"></p-columnFilter></th>
+      <th pResizableColumn>Gecheckt <p-columnFilter type="boolean" field="checked" display="menu"></p-columnFilter></th>
+      <th pResizableColumn>Link</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-document>
+    <tr>
+      <td>{{document.senderName}}</td>
+      <td>{{document.title}}</td>
+      <td>{{document.date | date: 'dd.MM.yyyy'}}</td>
+      <td><input type="checkbox" [checked]="document.checked" disabled></td>
+      <td><a [routerLink]="['/document', document.id]" routerLinkActive="active">Öffnen</a></td>
+    </tr>
+  </ng-template>
+</p-table>
+

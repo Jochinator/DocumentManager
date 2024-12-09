@@ -1,0 +1,22 @@
+<mat-form-field class="wrapper">
+  <mat-label>{{label}}</mat-label>
+  <ng-container *ngIf="type!=='date'; then notDateBlock else dateBlock"></ng-container>
+  <ng-template #notDateBlock>
+    <input (ngModelChange)="emitValue($event)"
+           [(ngModel)]="value"
+           [type]="type"
+           matInput/>
+  </ng-template>
+  <ng-template #dateBlock>
+    <div style="display: flex">
+      <input matInput
+             (dateChange)="updateDate($event)"
+             [value]="value"
+             [matDatepicker]="picker"/>
+      <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </div>
+  </ng-template>
+</mat-form-field>
+
+

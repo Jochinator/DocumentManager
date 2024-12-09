@@ -1,0 +1,16 @@
+<div *ngIf="metadata" class="details-wrapper">
+  <div class="left">
+    <app-input label="Titel" [(value)]="metadata.title"></app-input>
+    <app-input type="date" label="Datum" [(value)]="metadata.date"></app-input>
+    <app-input label="Kontakt" [(value)]="metadata.senderName"></app-input>
+    <app-tag-selection [(tags)]="metadata.tags"></app-tag-selection>
+    <mat-checkbox [(ngModel)]="metadata.checked">Überprüft</mat-checkbox>
+    <a [href]="sanitizedDocumentLink">download document</a>
+    <button mat-raised-button (click)="save()">Speichern</button>
+  </div>
+
+  <object [type]="metadata!.contentType"
+          [data]="sanitizedDocumentLink"
+          width="100%">
+  </object>
+</div>

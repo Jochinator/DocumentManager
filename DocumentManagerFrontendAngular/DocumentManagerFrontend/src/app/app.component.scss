@@ -1,0 +1,26 @@
+.app-wrapper{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header{
+  flex: 1 0 10%;
+}
+
+.main-content{
+  flex: 1 0 80%;
+}
+
+.footer{
+  flex: 1 0 10%;
+}
+
+nav{
+  display: flex;
+  flex-direction: row;
+}
+
+a{
+  margin: 5px;
+}
