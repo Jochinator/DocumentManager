@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {forkJoin, Observable, timer} from "rxjs";
+import {catchError, forkJoin, Observable, of, tap, timer} from "rxjs";
 import {Router} from "@angular/router";
 
 @Component({
@@ -27,7 +27,10 @@ export class FileUploadComponent implements OnInit {
       formData.append("file", file);
       formData.append("lastChanged", new Date(file.lastModified).toISOString());
 
-      const upload$ = this.http.post<string>("api/Document", formData);
+      const upload$ = this.http.post<string>("api/Document", formData).pipe(catchError(_ => {
+        alert(file.name + ' konnte nicht importiert werden')
+        return of('');
+      }));
       uploads$.push(upload$);
     }
     if (uploads$.length === 1){

@@ -23,6 +23,10 @@ public class DocumentProcessor
         metadata.Id = id;
         metadata.FilePath = _filePersistence.SaveFile(id, file);
         var textContent = new TextExtractor.TextExtractor().ExtractTextFromFile(_filePersistence.GetFullFilePath(id, file.FileExtension));
+        if (textContent == "")
+        {
+            throw new Exception();
+        }
         var tagList = new List<TagDto>();
         foreach (var tagDto in tagDtos.Where(dto => !dto.IsManualOnly))
         {
