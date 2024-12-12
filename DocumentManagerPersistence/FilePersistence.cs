@@ -35,4 +35,25 @@ public class FilePersistence
     {
         return Path.Combine(_definitions.DataRootFolder, GetRelativePath(id, fileExtension));
     }
+
+    public IEnumerable<string> GetFilesToImport()
+    {
+        return Directory.GetFiles(GetImportFolder());
+    }
+
+    private string GetImportFolder()
+    {
+        return Path.Combine(_definitions.DataRootFolder, _definitions.ImportFolder);
+    }
+
+    public string CopyImportedFile(Guid id, string file)
+    {
+        File.Copy(file, GetStoragePath(id, Path.GetExtension(file)));
+        return GetRelativePath(id, Path.GetExtension(file));
+    }
+
+    public void RemoveFile(string file)
+    {
+        File.Delete(file);
+    }
 }

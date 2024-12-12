@@ -33,6 +33,12 @@ public class DocumentController : ControllerBase
     {
         return _repository.GetDocument(id);
     }
+    
+    [HttpGet("triggerImport")]
+    public void ImportDocuments()
+    {
+        _documentProcessor.ImportDocumentsFromFileSystem();
+    }
 
     [HttpPost(Name = "Documents")]
     public Guid ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged)

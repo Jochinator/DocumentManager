@@ -1,3 +1,5 @@
 <input type="file" multiple class="file-upload" (change)="onFileSelected($event)">
+<br>
+<button (click)="triggerFolderBasedImport()">Import aller Dateien aus Imports Ordner</button>
 
-<app-spinner *ngIf="uploadInProgress"></app-spinner>
+<app-spinner *ngIf="importInProgress"></app-spinner>

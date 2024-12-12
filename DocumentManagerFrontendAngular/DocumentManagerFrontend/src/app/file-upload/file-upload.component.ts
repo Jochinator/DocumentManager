@@ -9,13 +9,13 @@ import {Router} from "@angular/router";
   styleUrls: ['./file-upload.component.scss']
 })
 export class FileUploadComponent implements OnInit {
-  uploadInProgress = false;
+  importInProgress = false;
   fileName = '';
 
   constructor(private http: HttpClient, private router: Router) {}
 
   onFileSelected(event: any) {
-    this.uploadInProgress = true;
+    this.importInProgress = true;
     let uploads$: Observable<string>[] = [];
     const files: File[] = event.target.files;
 
@@ -35,14 +35,14 @@ export class FileUploadComponent implements OnInit {
     }
     if (uploads$.length === 1){
       uploads$[0].subscribe(id => {
-        this.uploadInProgress = false;
+        this.importInProgress = false;
         this.router.navigate(["/document", id]);
       })
       return
     }
 
     forkJoin(uploads$).subscribe(() => {
-      this.uploadInProgress = false;
+      this.importInProgress = false;
       this.router.navigate(["/list"]);
     });
   }
@@ -50,4 +50,21 @@ export class FileUploadComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  triggerFolderBasedImport() {
+    this.importInProgress = true;
+    this.http.get<void>("api/Document/triggerImport")
+      .pipe(
+        catchError(_ =>
+        {
+          alert("es gab einen Fehler beim Ordnerbasierten Import");
+          return of(undefined);
+        })
+      ).subscribe(
+      {
+        next: _ => {
+          this.importInProgress = false
+        },
+        error: _ => this.importInProgress = false,
+      });
+  }
 }
