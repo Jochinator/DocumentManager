@@ -1,10 +1,13 @@
+using Microsoft.Extensions.Configuration;
+
 namespace DocumentManagerPersistence;
 
 public class PersistenceDefinitions
 {
-    public PersistenceDefinitions()
+    public PersistenceDefinitions(IConfiguration configuration)
     {
-        DataRootFolder = Path.Combine("/home", "jochen", "documentManagerData");
+        DataRootFolder = configuration["DataRootFolder"];
+        Console.WriteLine(DataRootFolder);
         DocumentFolder = "documents";
         ImportFolder = "imports";
         DeletedFolder = "deleted";

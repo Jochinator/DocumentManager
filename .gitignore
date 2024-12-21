@@ -351,3 +351,5 @@ MigrationBackup/
 
 *.db
 .idea
+
+documentManagerData
