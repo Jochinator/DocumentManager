@@ -26,4 +26,11 @@ export class DocumentDetailsComponent implements OnInit {
     if (this.metadata)
       this.client.put("api/Document/" + this.metadata.id, this.metadata).subscribe(value => this.router.navigate(['/list']));
   }
+
+  delete() {
+    if (this.metadata)
+      if (confirm('Wirklich löschen')){
+        this.client.delete("api/Document/" + this.metadata.id).subscribe(value => this.router.navigate(['/list']));
+      }
+  }
 }

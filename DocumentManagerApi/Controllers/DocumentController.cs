@@ -33,6 +33,12 @@ public class DocumentController : ControllerBase
     {
         return _repository.GetDocument(id);
     }
+
+    [HttpDelete("{id}")]
+    public void DeleteDocument([FromRoute] Guid id)
+    {
+        _repository.DeleteDocument(id);
+    }
     
     [HttpGet("triggerImport")]
     public void ImportDocuments()

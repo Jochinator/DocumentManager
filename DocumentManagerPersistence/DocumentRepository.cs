@@ -9,11 +9,13 @@ public class DocumentRepository
     private readonly string _dataRootFolder;
     private readonly string _documentFolder;
     private readonly string _dbPath;
+    private readonly string _deletedFolder;
 
     public DocumentRepository(PersistenceDefinitions definitions)
     {
         _dataRootFolder = definitions.DataRootFolder;
         _documentFolder = definitions.DocumentFolder;
+        _deletedFolder = definitions.DeletedFolder;
         _dbPath = GetCompleteFilePath("Documents.db");
     }
 
@@ -84,6 +86,26 @@ public class DocumentRepository
 
             db.SaveChanges();
             return metadata;
+        }
+    }
+
+    public void DeleteDocument(Guid id)
+    {
+        using (var db = new DocumentContext { DbPath = _dbPath })
+        {
+            var metadata = db.Metadatas.Single(data => data.Id == id);
+            try
+            {
+                File.Move(metadata.FilePath, Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
+            }
+            catch (FileNotFoundException e)
+            {
+                Console.WriteLine(e);
+            }
+            
+            db.Metadatas.Remove(metadata);
+
+            db.SaveChanges();
         }
     }
 }

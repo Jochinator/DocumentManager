@@ -7,6 +7,7 @@
     <mat-checkbox [(ngModel)]="metadata.checked">Überprüft</mat-checkbox>
     <a [href]="sanitizedDocumentLink">download document</a>
     <button mat-raised-button (click)="save()">Speichern</button>
+    <button mat-raised-button (click)="delete()">Löschen</button>
   </div>
 
   <object [type]="metadata!.contentType"
