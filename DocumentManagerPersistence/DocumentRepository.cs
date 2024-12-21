@@ -96,7 +96,7 @@ public class DocumentRepository
             var metadata = db.Metadatas.Single(data => data.Id == id);
             try
             {
-                File.Move(metadata.FilePath, Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
+                File.Move(GetCompleteFilePath(metadata.FilePath), Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
             }
             catch (FileNotFoundException e)
             {
