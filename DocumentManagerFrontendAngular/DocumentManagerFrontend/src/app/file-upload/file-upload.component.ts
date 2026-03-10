@@ -1,26 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, forkJoin, Observable, of, tap, timer} from "rxjs";
-import {Router} from "@angular/router";
+import {catchError, forkJoin, Observable, of} from "rxjs";
+import {ActivatedRoute, Router} from "@angular/router";
+import {SpinnerComponent} from '../spinner/spinner.component';
 
 @Component({
-  selector: 'app-file-upload',
-  templateUrl: './file-upload.component.html',
-  styleUrls: ['./file-upload.component.scss']
+    selector: 'app-file-upload',
+    templateUrl: './file-upload.component.html',
+    styleUrls: ['./file-upload.component.scss'],
+    imports: [SpinnerComponent]
 })
-export class FileUploadComponent implements OnInit {
-  importInProgress = false;
-  fileName = '';
+export class FileUploadComponent {
+  uploadInProgress = signal(false);
+  fileName = signal('');
 
-  constructor(private http: HttpClient, private router: Router) {}
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   onFileSelected(event: any) {
-    this.importInProgress = true;
+    this.uploadInProgress.set(true);
     let uploads$: Observable<string>[] = [];
     const files: File[] = event.target.files;
 
     for (const file of files) {
-      this.fileName = file.name;
+      this.fileName.set(file.name);
 
       const formData = new FormData();
 
@@ -35,36 +39,16 @@ export class FileUploadComponent implements OnInit {
     }
     if (uploads$.length === 1){
       uploads$[0].subscribe(id => {
-        this.importInProgress = false;
-        this.router.navigate(["/document", id]);
+        this.uploadInProgress.set(false);
+        this.router.navigate(["document", id], {relativeTo: this.route.parent});
       })
       return
     }
 
     forkJoin(uploads$).subscribe(() => {
-      this.importInProgress = false;
-      this.router.navigate(["/list"]);
+      this.uploadInProgress.set(false);
+      this.router.navigate(["list"], {relativeTo: this.route.parent});
     });
   }
 
-  ngOnInit(): void {
-  }
-
-  triggerFolderBasedImport() {
-    this.importInProgress = true;
-    this.http.get<void>("api/Document/triggerImport")
-      .pipe(
-        catchError(_ =>
-        {
-          alert("es gab einen Fehler beim Ordnerbasierten Import");
-          return of(undefined);
-        })
-      ).subscribe(
-      {
-        next: _ => {
-          this.importInProgress = false
-        },
-        error: _ => this.importInProgress = false,
-      });
-  }
 }

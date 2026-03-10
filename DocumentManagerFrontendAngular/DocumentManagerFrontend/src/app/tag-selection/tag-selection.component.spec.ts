@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TagSelectionComponent } from './tag-selection.component';
+import {provideHttpClient} from "@angular/common/http";
+import {provideHttpClientTesting} from "@angular/common/http/testing";
 
 describe('TagSelectionComponent', () => {
   let component: TagSelectionComponent;
@@ -8,7 +10,10 @@ describe('TagSelectionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TagSelectionComponent ]
+      imports: [ TagSelectionComponent ],
+      providers: [provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 

@@ -1,80 +1,70 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, model, signal, viewChild} from '@angular/core';
 import {COMMA, ENTER} from "@angular/cdk/keycodes";
-import {MatChipInputEvent} from "@angular/material/chips";
-import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
-import {FormControl} from "@angular/forms";
-import {map, Observable, startWith} from "rxjs";
+import {MatChipGrid, MatChipInput, MatChipInputEvent, MatChipRemove, MatChipRow} from "@angular/material/chips";
+import {
+  MatAutocomplete,
+  MatAutocompleteSelectedEvent,
+  MatAutocompleteTrigger,
+  MatOption
+} from "@angular/material/autocomplete";
+import {FormControl, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {map, startWith} from "rxjs";
 import {DocumentTag} from "../dataModel/documentMetadata";
 import {HttpClient} from "@angular/common/http";
+import {MatFormField, MatLabel} from '@angular/material/input';
+import {MatIcon} from '@angular/material/icon';
+import {toSignal} from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: 'app-tag-selection',
-  templateUrl: './tag-selection.component.html',
-  styleUrls: ['./tag-selection.component.scss']
+    selector: 'app-tag-selection',
+    templateUrl: './tag-selection.component.html',
+    styleUrls: ['./tag-selection.component.scss'],
+  imports: [MatFormField, MatLabel, MatChipGrid, MatChipRow, MatChipRemove, MatIcon, FormsModule, MatAutocompleteTrigger, MatChipInput, ReactiveFormsModule, MatAutocomplete, MatOption]
 })
-export class TagSelectionComponent implements OnInit {
+export class TagSelectionComponent {
   public separatorKeysCodes: number[] = [ENTER, COMMA];
-  @Input()
-  public tags: DocumentTag[] = [];
-  @Output()
-  public tagsChange = new EventEmitter<DocumentTag[]>();
+  tags = model<DocumentTag[]>([]);
+  private allTags = signal<DocumentTag[]>([]);
 
-  @ViewChild('tagInput')
-  tagInput!: ElementRef<HTMLInputElement>;
-
-  private allTags: DocumentTag[] = [];
+  tagInput = viewChild.required<ElementRef<HTMLInputElement>>('tagInput');
 
   tagCtrl = new FormControl('');
-  filteredTags$: Observable<DocumentTag[]>;
+  filteredTags = toSignal(
+    this.tagCtrl.valueChanges.pipe(
+      startWith(null),
+      map((tag: string | null) => tag ? this.filter(tag) : this.allTags().slice())
+    )
+  );
 
   constructor(private http: HttpClient) {
-    this.filteredTags$ = this.tagCtrl.valueChanges.pipe(
-      startWith(null),
-      map((tag: string | null) => (tag ? this.filter(tag) : this.allTags.slice())),
-    );
-  }
-
-  ngOnInit(): void {
-    this.http.get<DocumentTag[]>('api/Tag').subscribe(value => this.allTags = value);
+    this.http.get<DocumentTag[]>('api/Tag').subscribe(value => this.allTags.set(value));
   }
 
   remove(tag: DocumentTag) {
-    this.tags = this.tags.filter(x => x !== tag);
-    this.tagsChange.emit(this.tags);
+    this.tags.update(tags => tags.filter(x => x !== tag));
   }
 
   addToken($event: MatChipInputEvent) {
     const value = ($event.value || '').trim();
 
-    const existingTag = this.allTags.find(exisitingTag => exisitingTag.value === value);
-    if (existingTag){
-      this.tags.push(existingTag);
-    }
-    else {
-      this.tags.push({value});
-    }
+    const existingTag = this.allTags().find(exisitingTag => exisitingTag.value === value);
+    this.tags.update(tags => [...tags, existingTag ?? {value}]);
 
-    this.tagInput.nativeElement.value = '';
+
+    this.tagInput().nativeElement.value = '';
     this.tagCtrl.setValue(null);
-    this.tagsChange.emit(this.tags);
   }
 
   selected($event: MatAutocompleteSelectedEvent) {
-    const existingTag = this.allTags.find(exisitingTag => exisitingTag.value === $event.option.viewValue);
-    if (existingTag){
-      this.tags.push(existingTag);
-    }
-    else {
-      this.tags.push({value: $event.option.viewValue});
-    }
-    this.tagInput.nativeElement.value = '';
+    const existingTag = this.allTags().find(exisitingTag => exisitingTag.value === $event.option.viewValue);
+    this.tags.update(tags => [...tags, existingTag ?? { value: $event.option.viewValue }]);
+    this.tagInput().nativeElement.value = '';
     this.tagCtrl.setValue(null);
-    this.tagsChange.emit(this.tags);
   }
 
   private filter(value: string): DocumentTag[] {
     const filterValue = value.toLowerCase();
 
-    return this.allTags.filter(tag => tag.value.toLowerCase().includes(filterValue));
+    return this.allTags().filter(tag => tag.value.toLowerCase().includes(filterValue));
   }
 }

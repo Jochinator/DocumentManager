@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DocumentDetailsComponent } from './document-details.component';
+import {ActivatedRoute, provideRouter} from "@angular/router";
+import {provideHttpClient} from "@angular/common/http";
+import {provideHttpClientTesting} from "@angular/common/http/testing";
+import { of } from "rxjs";
 
 describe('DocumentDetailsComponent', () => {
   let component: DocumentDetailsComponent;
@@ -8,7 +12,18 @@ describe('DocumentDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DocumentDetailsComponent ]
+      imports: [ DocumentDetailsComponent ],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({ id: '123' }) // ← Mock Route Params!
+          }
+        }
+      ]
     })
     .compileComponents();
   });

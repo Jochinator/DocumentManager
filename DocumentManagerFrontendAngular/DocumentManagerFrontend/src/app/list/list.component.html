@@ -1,21 +1,23 @@
 <mat-form-field class="search-form-field">
   <mat-label>Volltextsuche</mat-label>
-  <input matInput type="text" [(ngModel)]="searchString" (ngModelChange)="initiateSearch(searchString)">
-  <button *ngIf="searchString" matSuffix mat-icon-button aria-label="Clear" (click)="searchString=''">
-    <mat-icon>close</mat-icon>
-  </button>
+  <input matInput type="text" [ngModel]="searchString()" (ngModelChange)="searchString.set($event); initiateSearch(searchString())">
+  @if (searchString()) {
+    <button matSuffix mat-icon-button aria-label="Clear" (click)="searchString.set('')">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
 </mat-form-field>
 
-<p-table [value]="metadatas"
-         [rowHover]="true"
-         [rows]="12"
-         [showCurrentPageReport]="true"
-         [rowsPerPageOptions]="[10,25,50]"
-         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-         [filterDelay]="0"
-         [globalFilterFields]="['Kontakt','document.title','date']"
-         [resizableColumns]="true" styleClass="p-datatable-gridlines"
-         [paginator]="true">
+<p-table [value]="metadatas()"
+  [rowHover]="true"
+  [rows]="12"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10,25,50]"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  [filterDelay]="0"
+  [globalFilterFields]="['Kontakt','document.title','date']"
+  [resizableColumns]="true" styleClass="p-datatable-gridlines"
+  [paginator]="true">
   <ng-template pTemplate="caption">
     <div class="table-header">
       List of Documents
@@ -36,7 +38,7 @@
       <td>{{document.title}}</td>
       <td>{{document.date | date: 'dd.MM.yyyy'}}</td>
       <td><input type="checkbox" [checked]="document.checked" disabled></td>
-      <td><a [routerLink]="['/document', document.id]" routerLinkActive="active">Öffnen</a></td>
+      <td><a [routerLink]="['..','document', document.id]" routerLinkActive="active">Öffnen</a></td>
     </tr>
   </ng-template>
 </p-table>
