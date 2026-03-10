@@ -25,7 +25,7 @@ public class DocumentProcessor
         return AddDocumentToDatabase(metadata, id, tagDtos, file.FileExtension);
     }
 
-    public void ImportDocumentsFromFileSystem()
+    public void ImportDocumentsFromFileSystem(string scope)
     {
         var tagDtos = _tagRepository.GetTags().ToList();
         var filesToImport = _filePersistence.GetFilesToImport();
@@ -37,7 +37,8 @@ public class DocumentProcessor
                 Title = Path.GetFileNameWithoutExtension(file),
                 Id = id,
                 FilePath = _filePersistence.CopyImportedFile(id, file),
-                FileExtension = Path.GetExtension(file)
+                FileExtension = Path.GetExtension(file),
+                Scope = scope
             };
             AddDocumentToDatabase(metadata, id, tagDtos, Path.GetExtension(file));
             _filePersistence.RemoveFile(file);

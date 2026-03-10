@@ -21,4 +21,6 @@ public class DocumentMetadataDto
     public string FileExtension { get; set; } = "";
 
     public string ContentType { get; set; } = "";
+    
+    public string Scope { get; set; } = "default";
 }

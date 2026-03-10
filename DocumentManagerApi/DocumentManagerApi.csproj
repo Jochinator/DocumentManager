@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <LangVersion>14</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,13 +19,22 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot\documents" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Update="wwwroot\*">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\documents\10235a86-7397-4c2f-9abe-7117f3c269f2.pdf" />
+      <_ContentIncludedByDefault Remove="wwwroot\documents\2a0e8737-9c31-404b-9144-cc7d4d3a3480.pdf" />
+      <_ContentIncludedByDefault Remove="wwwroot\documents\3e778dd5-342f-4446-b61f-c6e44b78f049.pdf" />
+      <_ContentIncludedByDefault Remove="wwwroot\documents\68be002c-cff3-4db5-82f3-3cf4996d71f8.pdf" />
+      <_ContentIncludedByDefault Remove="wwwroot\documents\72ab5796-aafe-4fc6-a411-d136dc8226f4.pdf" />
+      <_ContentIncludedByDefault Remove="wwwroot\documents\aa76c2f8-f930-4417-a758-a5d40abafc3b.pdf" />
     </ItemGroup>
     
 

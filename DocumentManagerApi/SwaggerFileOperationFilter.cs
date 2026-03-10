@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace DocumentManagerApi;
@@ -11,12 +11,17 @@ public class SwaggerFileOperationFilter : IOperationFilter
         if (operation.RequestBody == null || !operation.RequestBody.Content.Any(x => x.Key.Equals(fileUploadMime, StringComparison.InvariantCultureIgnoreCase)))  
             return;  
       
-        var fileParams = context.MethodInfo.GetParameters().Where(p => p.ParameterType == typeof(IFormFile));  
-        operation.RequestBody.Content[fileUploadMime].Schema.Properties =  
-            fileParams.ToDictionary(k => k.Name, v => new OpenApiSchema()  
+        var fileParams = context.MethodInfo.GetParameters().Where(p => p.ParameterType == typeof(IFormFile));
+        
+        var schema = operation.RequestBody.Content[fileUploadMime].Schema;
+        
+        foreach (var param in fileParams)
+        {
+            schema.Properties[param.Name!] = new OpenApiSchema()  
             {  
-                Type = "string",  
+                Type = JsonSchemaType.String,  
                 Format = "binary"  
-            });  
+            };
+        }  
     }  
 }

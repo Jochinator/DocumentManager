@@ -16,7 +16,8 @@ public static class DocumentMetadataConversionExtensions
             ContentType = dao.ContentType,
             FileExtension = dao.FileExtension,
             FilePath = dao.FilePath,
-            SenderName = dao.SenderName
+            SenderName = dao.SenderName,
+            Scope = dao.Scope
         };
     }
 
@@ -33,7 +34,8 @@ public static class DocumentMetadataConversionExtensions
             FileExtension = dto.FileExtension,
             FilePath = dto.FilePath,
             SenderName = dto.SenderName,
-            TextContent = textContent
+            TextContent = textContent,
+            Scope = dto.Scope
         };
     }
     

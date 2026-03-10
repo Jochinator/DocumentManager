@@ -7,14 +7,12 @@ namespace DocumentManagerPersistence;
 public class DocumentRepository
 {
     private readonly string _dataRootFolder;
-    private readonly string _documentFolder;
     private readonly string _dbPath;
     private readonly string _deletedFolder;
 
     public DocumentRepository(PersistenceDefinitions definitions)
     {
         _dataRootFolder = definitions.DataRootFolder;
-        _documentFolder = definitions.DocumentFolder;
         _deletedFolder = definitions.DeletedFolder;
         _dbPath = GetCompleteFilePath("Documents.db");
     }
@@ -45,20 +43,23 @@ public class DocumentRepository
         return Path.Combine(_dataRootFolder, filePath);
     }
 
-    public IEnumerable<DocumentMetadataDto> GetDocuments()
+    public IEnumerable<DocumentMetadataDto> GetDocuments(string scope)
     {
         using (var db = new DocumentContext{ DbPath = _dbPath })
         { 
-            var metadataList = db.Metadatas.Include(dao => dao.Tags).ToList();
+            var metadataList = db.Metadatas
+                .Where(dao => dao.Scope == scope)
+                .Include(dao => dao.Tags)
+                .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
     }
 
-    public IEnumerable<DocumentMetadataDto> GetDocuments(string search)
+    public IEnumerable<DocumentMetadataDto> GetDocuments(string scope, string search)
     {
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
-            var metadataList = db.Metadatas.Where(dao => EF.Functions.Like(dao.TextContent, $"%{search}%")).Include(dao => dao.Tags)
+            var metadataList = db.Metadatas.Where(dao => dao.Scope == scope).Where(dao => EF.Functions.Like(dao.TextContent, $"%{search}%")).Include(dao => dao.Tags)
                 .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
@@ -107,5 +108,15 @@ public class DocumentRepository
 
             db.SaveChanges();
         }
+    }
+
+    public IEnumerable<string> GetScopes()
+    {
+        using var db = new DocumentContext { DbPath = _dbPath };
+        return db.Metadatas
+            .Select(dao => dao.Scope)
+            .Distinct()
+            .OrderBy(scope => scope)
+            .ToList();
     }
 }

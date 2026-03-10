@@ -23,9 +23,10 @@ public class DocumentController : ControllerBase
     [HttpGet(Name = "Documents")]
     public IEnumerable<DocumentMetadataDto> GetDocuments([FromQuery(Name = "search")] string? search = "")
     {
+        var scope = GetScope();
         if (search != null && search.Length > 0)
-            return _repository.GetDocuments(search);
-        return _repository.GetDocuments();
+            return _repository.GetDocuments(search, scope);
+        return _repository.GetDocuments(scope);
     }
     
     [HttpGet("{id}")]
@@ -43,18 +44,21 @@ public class DocumentController : ControllerBase
     [HttpGet("triggerImport")]
     public void ImportDocuments()
     {
-        _documentProcessor.ImportDocumentsFromFileSystem();
+        var scope = GetScope();
+        _documentProcessor.ImportDocumentsFromFileSystem(scope);
     }
 
     [HttpPost(Name = "Documents")]
     public Guid ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged)
     {
+        var scope = GetScope();
         return _documentProcessor.CreateDocument(new DocumentMetadataDto
         {
             Title = Path.GetFileNameWithoutExtension(file.FileName),
             Date = DateTime.Parse(lastChanged),
             FileExtension = Path.GetExtension(file.FileName),
-            ContentType = file.ContentType
+            ContentType = file.ContentType,
+            Scope = scope
         }, new DocumentFile(Path.GetExtension(file.FileName), file.OpenReadStream())).Id;
     }
     
@@ -63,4 +67,9 @@ public class DocumentController : ControllerBase
     {
         _repository.UpdateMetadata(metadata);
     }
+    
+    private string GetScope() => 
+        Request.Headers.TryGetValue("X-Scope", out var scope) 
+            ? scope.ToString() 
+            : "default";
 }
