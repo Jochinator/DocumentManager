@@ -14,11 +14,21 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.4" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\DocumentManagerModel\DocumentManagerModel.csproj" />
       <ProjectReference Include="..\DocumentManager.TextExtractor\DocumentManager.TextExtractor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Configuration">
+        <HintPath>..\..\..\Users\jreuter\.dotnet\packs\Microsoft.AspNetCore.App.Ref\10.0.3\ref\net10.0\Microsoft.Extensions.Configuration.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+        <HintPath>..\..\..\Users\jreuter\.dotnet\packs\Microsoft.AspNetCore.App.Ref\10.0.3\ref\net10.0\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

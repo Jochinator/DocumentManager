@@ -28,7 +28,8 @@ export class DocumentDetailsComponent {
 
   sanitizedDocumentLink = computed(() => {
     const metadata = this.metadata();
-    return metadata ? this.sanitizer.bypassSecurityTrustResourceUrl(metadata.filePath) : undefined;
+    //hack to make inlining pdf with correct filename in chrome work
+    return metadata ? this.sanitizer.bypassSecurityTrustResourceUrl(`api/Document/${metadata.id}/${(metadata?.filePath.split(/[/\\]/).pop())}`) : undefined;
   })
 
   constructor(private route: ActivatedRoute, private client: HttpClient, private sanitizer: DomSanitizer, private router: Router) {

@@ -1,5 +1,6 @@
 using DocumentManager.DocumentProcessor;
 using DocumentManagerApi;
+using DocumentManagerModel;
 using DocumentManagerPersistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,12 +14,28 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.OperationFilter<SwaggerFileOperationFilter>();
 });
-builder.Services.AddSingleton<PersistenceDefinitions>();
-builder.Services.AddSingleton<DocumentRepository>();
-builder.Services.AddSingleton<TagRepository>();
+builder.Services.AddScoped<DocumentRepository>();
+builder.Services.AddScoped<TagRepository>();
+builder.Services.AddScoped<FilePersistence>();
 
 builder.Services.AddScoped<DocumentProcessor>();
-builder.Services.AddScoped<FilePersistence>();
+builder.Services.AddScoped<FileSystemDocumentFileFactory>();
+
+builder.Services.AddHostedService<DataMigrationService>();
+builder.Services.AddScoped<IDataMigration, FileNameMigration>();
+
+builder.Services.Configure<PersistenceDefinitions>(
+    builder.Configuration.GetSection("PersistenceDefinitions"));
+
+var definitions = builder.Configuration
+    .GetSection("PersistenceDefinitions")
+    .Get<PersistenceDefinitions>();
+
+Directory.CreateDirectory(definitions!.DataRootFolder);
+Directory.CreateDirectory(Path.Combine(definitions.DataRootFolder, definitions.DocumentFolder));
+Directory.CreateDirectory(Path.Combine(definitions.DataRootFolder, definitions.ImportFolder));
+Directory.CreateDirectory(Path.Combine(definitions.DataRootFolder, definitions.DeletedFolder));
+Directory.CreateDirectory(Path.Combine(definitions.DataRootFolder, definitions.FailedFolder));
 
 var app = builder.Build();
 
@@ -44,7 +61,10 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapControllers();
 
-var documentRepository = app.Services.GetService<DocumentRepository>();
-documentRepository.Init();
+using (var scope = app.Services.CreateScope())
+{
+    var documentRepository = scope.ServiceProvider.GetRequiredService<DocumentRepository>();
+    documentRepository.Init();
+}
 
 app.Run();

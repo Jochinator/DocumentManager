@@ -3,6 +3,7 @@ using DocumentManager;
 using DocumentManager.TextExtractor;
 using DocumentManagerModel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DocumentManagerPersistence;
 
@@ -11,9 +12,9 @@ public class TagRepository
     private readonly string _dataRootFolder;
     private readonly string _dbPath;
 
-    public TagRepository(PersistenceDefinitions definitions)
+    public TagRepository(IOptions<PersistenceDefinitions> definitions)
     {
-        _dataRootFolder = definitions.DataRootFolder;
+        _dataRootFolder = definitions.Value.DataRootFolder;
         _dbPath = GetCompleteFilePath("Documents.db");
     }
 

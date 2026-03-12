@@ -6,7 +6,7 @@
       <app-input label="Kontakt" [(value)]="senderName"></app-input>
       <app-tag-selection [(tags)]="tags"></app-tag-selection>
       <mat-checkbox [(ngModel)]="checked">Überprüft</mat-checkbox>
-      <a [href]="sanitizedDocumentLink()">download document</a>
+      <a [href]="sanitizedDocumentLink()" download>download document</a>
       <button mat-raised-button (click)="save()">Speichern</button>
       <button mat-raised-button (click)="delete()">Löschen</button>
     </div>

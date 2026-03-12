@@ -4,9 +4,9 @@ public class ManagedDocument
 {
     public Guid Id { get; set; }
     public DocumentMetadataDao Metadata { get; }
-    public DocumentFile File { get; }
+    public IDocumentFile File { get; }
 
-    public ManagedDocument(DocumentMetadataDao metadata, DocumentFile file)
+    public ManagedDocument(DocumentMetadataDao metadata, IDocumentFile file)
     {
         Metadata = metadata;
         File = file;

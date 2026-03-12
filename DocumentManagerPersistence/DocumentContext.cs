@@ -13,4 +13,6 @@ public class DocumentContext: DbContext
 
     public DbSet<DocumentMetadataDao> Metadatas { get; set; }
     public DbSet<TagDao> Tags { get; set; }
+    public DbSet<DataMigrationDao> DataMigrations { get; set; }
+    public DbSet<DataMigrationErrorDao> DataMigrationErrors { get; set; }
 }

@@ -1,6 +1,7 @@
 using DocumentManager;
 using DocumentManagerModel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DocumentManagerPersistence;
 
@@ -9,11 +10,13 @@ public class DocumentRepository
     private readonly string _dataRootFolder;
     private readonly string _dbPath;
     private readonly string _deletedFolder;
+    private readonly FilePersistence _filePersistence;
 
-    public DocumentRepository(PersistenceDefinitions definitions)
+    public DocumentRepository(IOptions<PersistenceDefinitions> definitions, FilePersistence filePersistence)
     {
-        _dataRootFolder = definitions.DataRootFolder;
-        _deletedFolder = definitions.DeletedFolder;
+        _filePersistence = filePersistence;
+        _dataRootFolder = definitions.Value.DataRootFolder;
+        _deletedFolder = definitions.Value.DeletedFolder;
         _dbPath = GetCompleteFilePath("Documents.db");
     }
 
@@ -23,8 +26,12 @@ public class DocumentRepository
         db.Database.Migrate();
     }
 
-    public DocumentMetadataDao CreateDocument(DocumentMetadataDao metadata)
+    public DocumentMetadataDao CreateDocument(DocumentMetadataDao metadata, IDocumentFile file)
     {
+        var id = Guid.NewGuid();
+        metadata.Id = id;
+        metadata.FilePath = _filePersistence.SaveFile(file, metadata.GenerateFileName());
+        
         using (var db = new DocumentContext{ DbPath = _dbPath })
         {
             db.Metadatas.Add(metadata);
@@ -36,6 +43,13 @@ public class DocumentRepository
         }
 
         return metadata;
+    }
+    
+    public string GetFilePath(Guid id)
+    {
+        using var db = new DocumentContext{ DbPath = _dbPath };
+        var metadata = db.Metadatas.Single(data => data.Id == id);
+        return GetCompleteFilePath(metadata.FilePath);
     }
 
     private string GetCompleteFilePath(string filePath)
@@ -54,6 +68,17 @@ public class DocumentRepository
             return metadataList.Select(dao => dao.ToDto());
         }
     }
+    
+    internal IEnumerable<DocumentMetadataDto> GetAllDocuments()
+    {
+        using (var db = new DocumentContext{ DbPath = _dbPath })
+        { 
+            var metadataList = db.Metadatas
+                .Include(dao => dao.Tags)
+                .ToList();
+            return metadataList.Select(dao => dao.ToDto());
+        }
+    }
 
     public IEnumerable<DocumentMetadataDto> GetDocuments(string scope, string search)
     {
@@ -67,27 +92,46 @@ public class DocumentRepository
 
     public DocumentMetadataDto GetDocument(Guid id)
     {
-        using (var db = new DocumentContext{ DbPath = _dbPath })
-        {
-            var metadata = db.Metadatas.Include(dao => dao.Tags).Single(data => data.Id == id);
-            Directory.CreateDirectory(Path.Combine("wwwroot", "documents"));
-            File.Copy(GetCompleteFilePath(metadata.FilePath), Path.Combine("wwwroot", "documents", metadata.Id + metadata.FileExtension), true);
-            return metadata.ToDto();
-        }
+        using var db = new DocumentContext{ DbPath = _dbPath };
+        var metadata = db.Metadatas.Include(dao => dao.Tags).Single(data => data.Id == id);
+        return metadata.ToDto();
     }
 
     public DocumentMetadataDto UpdateMetadata(DocumentMetadataDto metadata)
     {
-        using (var db = new DocumentContext{ DbPath = _dbPath })
+        using var db = new DocumentContext{ DbPath = _dbPath };
+    
+        var persistedDao = db.Metadatas.Include(dao => dao.Tags).Single(dao => dao.Id == metadata.Id);
+    
+        var newDao = metadata.ToDao("");
+        persistedDao.UpdateFromDao(newDao);
+    
+        var newFileName = persistedDao.GenerateFileName();
+        var newRelativePath = _filePersistence.GetRelativePath(newFileName, newDao.FileExtension);
+    
+        if (persistedDao.FilePath != newRelativePath)
         {
-            var persistedDao = db.Metadatas.Include(dao => dao.Tags).Single(dao => dao.Id ==  metadata.Id);
-
-            var newDao = metadata.ToDao("");
-            persistedDao.UpdateFromDao(newDao);
-
+            var oldFilePath = persistedDao.FilePath;
+            
+            persistedDao.FilePath = _filePersistence.CopyToNewName(oldFilePath, persistedDao.GenerateFileName(), metadata.FileExtension);
+            
             db.SaveChanges();
-            return metadata;
+
+            try
+            {
+                _filePersistence.DeleteManagedFile(oldFilePath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
+        else
+        {
+            db.SaveChanges();
+        }
+    
+        return metadata;
     }
 
     public void DeleteDocument(Guid id)
@@ -118,5 +162,18 @@ public class DocumentRepository
             .Distinct()
             .OrderBy(scope => scope)
             .ToList();
+    }
+    
+    internal bool IsMigrationCompleted(string migrationName)
+    {
+        using var db = new DocumentContext { DbPath = _dbPath };
+        return db.DataMigrations.Any(m => m.Name == migrationName && m.Completed);
+    }
+
+    internal void SaveMigration(DataMigrationDao migrationDao)
+    {
+        using var db = new DocumentContext { DbPath = _dbPath };
+        db.DataMigrations.Add(migrationDao);
+        db.SaveChanges();
     }
 }

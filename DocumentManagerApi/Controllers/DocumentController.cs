@@ -25,7 +25,7 @@ public class DocumentController : ControllerBase
     {
         var scope = GetScope();
         if (search != null && search.Length > 0)
-            return _repository.GetDocuments(search, scope);
+            return _repository.GetDocuments(scope, search);
         return _repository.GetDocuments(scope);
     }
     
@@ -33,6 +33,16 @@ public class DocumentController : ControllerBase
     public DocumentMetadataDto GetDocument([FromRoute] Guid id)
     {
         return _repository.GetDocument(id);
+    }
+    
+    [HttpGet("{id}/{fileName}")]
+    public IActionResult GetFile([FromRoute] Guid id)
+    {
+        var metadata = _repository.GetDocument(id);
+        var fullPath = _repository.GetFilePath(id);
+
+        
+        return PhysicalFile(Path.GetFullPath(fullPath), metadata.ContentType, enableRangeProcessing: true);
     }
 
     [HttpDelete("{id}")]
@@ -52,6 +62,8 @@ public class DocumentController : ControllerBase
     public Guid ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged)
     {
         var scope = GetScope();
+        
+        using var streamDocumentFile = new StreamDocumentFile(Path.GetExtension(file.FileName), file.OpenReadStream());
         return _documentProcessor.CreateDocument(new DocumentMetadataDto
         {
             Title = Path.GetFileNameWithoutExtension(file.FileName),
@@ -59,7 +71,7 @@ public class DocumentController : ControllerBase
             FileExtension = Path.GetExtension(file.FileName),
             ContentType = file.ContentType,
             Scope = scope
-        }, new DocumentFile(Path.GetExtension(file.FileName), file.OpenReadStream())).Id;
+        }, streamDocumentFile).Id;
     }
     
     [HttpPut("{id}")]
