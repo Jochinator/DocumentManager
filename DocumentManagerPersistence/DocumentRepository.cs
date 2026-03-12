@@ -10,13 +10,18 @@ public class DocumentRepository
     private readonly string _dataRootFolder;
     private readonly string _dbPath;
     private readonly string _deletedFolder;
+    
     private readonly FilePersistence _filePersistence;
+    private readonly FilesystemViewService _filesystemViewService;
+    private readonly PersistenceDefinitions _definitions;
 
-    public DocumentRepository(IOptions<PersistenceDefinitions> definitions, FilePersistence filePersistence)
+    public DocumentRepository(IOptions<PersistenceDefinitions> definitions, FilePersistence filePersistence, FilesystemViewService filesystemViewService)
     {
+        _definitions = definitions.Value;
         _filePersistence = filePersistence;
-        _dataRootFolder = definitions.Value.DataRootFolder;
-        _deletedFolder = definitions.Value.DeletedFolder;
+        _filesystemViewService = filesystemViewService;
+        _dataRootFolder = _definitions.DataRootFolder;
+        _deletedFolder = _definitions.DeletedFolder;
         _dbPath = GetCompleteFilePath("Documents.db");
     }
 
@@ -24,6 +29,11 @@ public class DocumentRepository
     {
         using var db = new DocumentContext { DbPath = _dbPath };
         db.Database.Migrate();
+        
+        if (!_definitions.GenerateFilesystemView)
+            return;
+        var documents = GetAllDocuments();
+        _filesystemViewService.RegenerateView(documents);
     }
 
     public DocumentMetadataDao CreateDocument(DocumentMetadataDao metadata, IDocumentFile file)
@@ -41,7 +51,8 @@ public class DocumentRepository
             }
             db.SaveChanges();
         }
-
+        
+        _filesystemViewService.AddDocumentToView(metadata.ToDto());
         return metadata;
     }
     
@@ -102,6 +113,8 @@ public class DocumentRepository
         using var db = new DocumentContext{ DbPath = _dbPath };
     
         var persistedDao = db.Metadatas.Include(dao => dao.Tags).Single(dao => dao.Id == metadata.Id);
+        
+        var oldMetadata = persistedDao.ToDto();
     
         var newDao = metadata.ToDao("");
         persistedDao.UpdateFromDao(newDao);
@@ -130,15 +143,19 @@ public class DocumentRepository
         {
             db.SaveChanges();
         }
+        
+        _filesystemViewService.UpdateDocumentInView(oldMetadata, metadata);
     
         return metadata;
     }
 
     public void DeleteDocument(Guid id)
     {
+        DocumentMetadataDto deletedMetadata;
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
-            var metadata = db.Metadatas.Single(data => data.Id == id);
+            var metadata = db.Metadatas.Include(dao => dao.Tags).Single(data => data.Id == id);
+            deletedMetadata = metadata.ToDto();
             try
             {
                 File.Move(GetCompleteFilePath(metadata.FilePath), Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
@@ -152,6 +169,8 @@ public class DocumentRepository
 
             db.SaveChanges();
         }
+        
+        _filesystemViewService.RemoveDocumentFromView(deletedMetadata);
     }
 
     public IEnumerable<string> GetScopes()

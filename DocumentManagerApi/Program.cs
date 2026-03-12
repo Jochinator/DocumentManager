@@ -24,6 +24,7 @@ builder.Services.AddScoped<FileSystemDocumentFileFactory>();
 builder.Services.AddHostedService<DataMigrationService>();
 builder.Services.AddScoped<IDataMigration, FileNameMigration>();
 builder.Services.AddScoped<IDataMigration, ScopeBasedFileStructureMigration>();
+builder.Services.AddScoped<FilesystemViewService>();
 
 builder.Services.Configure<PersistenceDefinitions>(
     builder.Configuration.GetSection("PersistenceDefinitions"));
