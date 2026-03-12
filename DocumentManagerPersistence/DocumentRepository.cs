@@ -30,7 +30,7 @@ public class DocumentRepository
     {
         var id = Guid.NewGuid();
         metadata.Id = id;
-        metadata.FilePath = _filePersistence.SaveFile(file, metadata.GenerateFileName());
+        metadata.FilePath = _filePersistence.SaveFile(file, metadata.GenerateFileName(), metadata.Scope);
         
         using (var db = new DocumentContext{ DbPath = _dbPath })
         {
@@ -107,13 +107,13 @@ public class DocumentRepository
         persistedDao.UpdateFromDao(newDao);
     
         var newFileName = persistedDao.GenerateFileName();
-        var newRelativePath = _filePersistence.GetRelativePath(newFileName, newDao.FileExtension);
+        var newRelativePath = _filePersistence.GetRelativePath(metadata.Scope, newFileName, newDao.FileExtension);
     
         if (persistedDao.FilePath != newRelativePath)
         {
             var oldFilePath = persistedDao.FilePath;
             
-            persistedDao.FilePath = _filePersistence.CopyToNewName(oldFilePath, persistedDao.GenerateFileName(), metadata.FileExtension);
+            persistedDao.FilePath = _filePersistence.CopyToNewName(metadata.Scope, oldFilePath, persistedDao.GenerateFileName(), metadata.FileExtension);
             
             db.SaveChanges();
 

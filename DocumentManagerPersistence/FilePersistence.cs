@@ -13,38 +13,39 @@ public class FilePersistence
         _definitions = definitions.Value;
     }
     
-    public string SaveFile(IDocumentFile file, string fileName)
+    public string SaveFile(IDocumentFile file, string fileName, string scope)
     {
-        var uniqueFileName = EnsureUniqueFileName(fileName, file.FileExtension);
-        string storagePath = GetStoragePath(uniqueFileName, file.FileExtension);
+        Directory.CreateDirectory(Path.Combine(_definitions.DataRootFolder, _definitions.DocumentFolder, scope));
+        var uniqueFileName = EnsureUniqueFileName(fileName, file.FileExtension, scope);
+        string storagePath = GetStoragePath(uniqueFileName, file.FileExtension, scope);
         file.CopyTo(storagePath);
 
-        return GetRelativePath(uniqueFileName, file.FileExtension);
+        return GetRelativePath(scope, uniqueFileName, file.FileExtension);
     }
 
-    private string EnsureUniqueFileName(string fileName, string fileExtension)
+    private string EnsureUniqueFileName(string fileName, string fileExtension, string scope)
     {
-        if (!File.Exists(GetStoragePath(fileName, fileExtension)))
+        if (!File.Exists(GetStoragePath(fileName, fileExtension, scope)))
         { 
             return fileName;
         }
 
         var counter = 1;
-        while (File.Exists(GetStoragePath($"{fileName}_{counter}", fileExtension)))
+        while (File.Exists(GetStoragePath($"{fileName}_{counter}", fileExtension, scope)))
         {
             counter++;
         }
         return $"{fileName}_{counter}";
     }
 
-    public string GetRelativePath(string fileName, string fileExtension)
+    internal string GetRelativePath(string scope, string fileName, string fileExtension)
     {
-        return Path.Combine(_definitions.DocumentFolder, fileName + fileExtension);
+        return Path.Combine(_definitions.DocumentFolder, scope, fileName + fileExtension);
     }
 
-    private string GetStoragePath(string fileName, string fileExtension)
+    private string GetStoragePath(string fileName, string fileExtension, string scope)
     {
-        return Path.Combine(_definitions.DataRootFolder, GetRelativePath(fileName, fileExtension));
+        return Path.Combine(_definitions.DataRootFolder, GetRelativePath(scope, fileName, fileExtension));
     }
 
     public IEnumerable<string> GetFilesToImport()
@@ -62,10 +63,11 @@ public class FilePersistence
         File.Delete(file);
     }
     
-    public string CopyToNewName(string oldRelativePath, string newFileName, string fileExtension)
+    public string CopyToNewName(string scope, string oldRelativePath, string newFileName, string fileExtension)
     {
-        var uniqueFileName = EnsureUniqueFileName(newFileName, fileExtension);
-        var newRelativePath = GetRelativePath(uniqueFileName, fileExtension);
+        Directory.CreateDirectory(Path.Combine(_definitions.DataRootFolder, _definitions.DocumentFolder, scope));
+        var uniqueFileName = EnsureUniqueFileName(newFileName, fileExtension, scope);
+        var newRelativePath = GetRelativePath(scope, uniqueFileName, fileExtension);
     
         File.Copy(
             Path.Combine(_definitions.DataRootFolder, oldRelativePath), 
