@@ -142,3 +142,6 @@ Tags can be:
 ## License
 
 MIT
+### Third Party Licenses
+
+- [PdfPig](https://github.com/UglyToad/PdfPig) - Apache 2.0
