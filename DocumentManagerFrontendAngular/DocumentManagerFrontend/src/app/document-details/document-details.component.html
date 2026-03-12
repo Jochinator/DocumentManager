@@ -1,13 +1,13 @@
 @if (metadata()) {
   <div class="details-wrapper">
-    <form [formGroup]="form">
-      <div class="left">
-        <app-input label="Titel" formControlName="title"></app-input>
-        <app-input type="date" label="Datum" formControlName="date"></app-input>
-        <app-input label="Kontakt" formControlName="senderName"></app-input>
-        <app-tag-selection formControlName="tags"></app-tag-selection>
-        <mat-checkbox formControlName="checked">Überprüft</mat-checkbox>
-        <a [href]="sanitizedDocumentLink()" download>download document</a>
+    <form [formGroup]="form" class="left">
+      <app-input label="Titel" formControlName="title"></app-input>
+      <app-input type="date" label="Datum" formControlName="date"></app-input>
+      <app-input label="Kontakt" formControlName="senderName"></app-input>
+      <app-tag-selection formControlName="tags"></app-tag-selection>
+      <mat-checkbox formControlName="checked">Überprüft</mat-checkbox>
+      <div class="actions">
+        <a [href]="sanitizedDocumentLink()" download mat-raised-button>Dokument runterladen</a>
         <button mat-raised-button (click)="save()" [disabled]="form.invalid">Speichern</button>
         <button mat-raised-button (click)="delete()">Löschen</button>
       </div>
