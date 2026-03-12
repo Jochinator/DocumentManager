@@ -2,19 +2,19 @@
   <mat-label>{{label()}}</mat-label>
   @if (type()!=='date') {
     <input (ngModelChange)="emitValue($event)"
-      [(ngModel)]="value"
-      [type]="type()"
-      matInput/>
+           [(ngModel)]="value"
+           [type]="type()"
+           [disabled]="disabled"
+           matInput/>
   } @else {
     <div style="display: flex">
       <input matInput
-        (dateChange)="updateDate($event)"
-        [value]="value()"
-        [matDatepicker]="picker"/>
+             (dateChange)="updateDate($event)"
+             [value]="value"
+             [matDatepicker]="picker"
+             [disabled]="disabled"/>
       <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </div>
   }
 </mat-form-field>
-
-

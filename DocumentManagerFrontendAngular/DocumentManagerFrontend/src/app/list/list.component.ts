@@ -18,7 +18,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     styleUrls: ['./list.component.scss'],
   imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatIcon, TableModule, PrimeTemplate, RouterLinkActive, RouterLink, DatePipe]
 })
-export class ListComponent implements OnInit {
+export class ListComponent {
   public metadatas = signal<DocumentMetadata[]>([]);
   public searchString = signal('');
   private searchSubject = new Subject<string>();
@@ -27,20 +27,23 @@ export class ListComponent implements OnInit {
     this.route.params.pipe(
       takeUntilDestroyed(),
       switchMap(() => this.client.get<DocumentMetadata[]>('api/Document'))
-    ).subscribe(value => this.metadatas.set(value));
+    ).subscribe(value => this.metadatas.set(this.mapDates(value)));
     this.searchSubject.pipe(
       takeUntilDestroyed(),
       debounceTime(250),
       distinctUntilChanged(),
       switchMap(searchString => this.client.get<DocumentMetadata[]>('api/Document', searchString.length > 0 ? {params: {'search': searchString}}: undefined)))
-      .subscribe(value => this.metadatas.set(value));
-  }
-
-  ngOnInit(): void {
-    this.client.get<DocumentMetadata[]>('api/Document').subscribe(value => this.metadatas.set(value));
+      .subscribe(value => this.metadatas.set(this.mapDates(value)));
   }
 
   initiateSearch(searchString: string) {
     this.searchSubject.next(searchString);
+  }
+
+  private mapDates(documents: DocumentMetadata[]): DocumentMetadata[] {
+    return documents.map(doc => ({
+      ...doc,
+      date: new Date(doc.date)
+    }));
   }
 }

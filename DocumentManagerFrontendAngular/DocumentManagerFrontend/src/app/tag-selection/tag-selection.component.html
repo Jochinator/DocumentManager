@@ -1,6 +1,6 @@
 <mat-form-field class="wrapper">
   <mat-label>Tags:</mat-label>
-  <mat-chip-grid #tagChips aria-label="Tag Selection">
+  <mat-chip-grid #tagChips aria-label="Tag Selection" [formControl]="chipGrid">
     @for (tag of tags(); track tag) {
       <mat-chip-row (removed)="remove(tag)">
         {{tag.value}}
@@ -16,6 +16,9 @@
     [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
     [matChipInputAddOnBlur]="false"
     (matChipInputTokenEnd)="addToken($event)"/>
+  @if (tagCtrl.value) {
+    <mat-error>Neuen Tag mit Enter bestätigen</mat-error>
+  }
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
     @for (tag of filteredTags(); track tag) {
       <mat-option [value]="tag.value">
