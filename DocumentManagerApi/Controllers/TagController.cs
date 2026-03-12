@@ -22,4 +22,17 @@ public class TagController : ControllerBase
     {
         return _repository.GetTags();
     }
+    
+    [HttpPut("{id}")]
+    public TagDto UpdateTag([FromRoute] Guid id, [FromBody] TagDto tag)
+    {
+        tag.Id = id;
+        return _repository.UpdateTag(tag);
+    }
+
+    [HttpDelete("{id}")]
+    public void DeleteTag([FromRoute] Guid id)
+    {
+        _repository.DeleteTag(id);
+    }
 }

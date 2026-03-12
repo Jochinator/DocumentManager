@@ -30,4 +30,22 @@ public class TagRepository
             return db.Tags.Select(dao => dao.ToDto()).ToList();
         }
     }
+    
+    public TagDto UpdateTag(TagDto tag)
+    {
+        using var db = new DocumentContext { DbPath = _dbPath };
+        var persistedTag = db.Tags.Single(t => t.Id == tag.Id);
+        persistedTag.IsManualOnly = tag.IsManualOnly;
+        persistedTag.Value = tag.Value;
+        db.SaveChanges();
+        return tag;
+    }
+
+    public void DeleteTag(Guid id)
+    {
+        using var db = new DocumentContext { DbPath = _dbPath };
+        var tag = db.Tags.Single(t => t.Id == id);
+        db.Tags.Remove(tag);
+        db.SaveChanges();
+    }
 }
