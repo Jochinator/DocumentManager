@@ -27,9 +27,11 @@ public class DocumentRepository
 
     public void Init()
     {
+        Console.WriteLine("Creating DBContext");
         using var db = new DocumentContext { DbPath = _dbPath };
+        Console.WriteLine("migrating Database");
         db.Database.Migrate();
-        
+        Console.WriteLine("Migration done");
         if (!_definitions.GenerateFilesystemView)
             return;
         var documents = GetAllDocuments();

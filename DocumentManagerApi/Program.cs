@@ -65,6 +65,7 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
+    Console.WriteLine("initializing document Repository");
     var documentRepository = scope.ServiceProvider.GetRequiredService<DocumentRepository>();
     documentRepository.Init();
 }
