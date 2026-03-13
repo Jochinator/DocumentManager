@@ -22,7 +22,7 @@ import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from "@angular/mater
     }
   ]
 })
-export class InputComponent<T extends object> implements ControlValueAccessor {
+export class InputComponent<T extends object | string> implements ControlValueAccessor {
   type = input<'color' | 'date' | 'datetime-local' | 'email' | 'month' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'time' | 'url' | 'week'>('text');
   label = input<string>('');
   options = input<T[]>([]);
