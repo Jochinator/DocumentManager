@@ -77,6 +77,7 @@ public class DocumentController : ControllerBase
     [HttpPut("{id}")]
     public void UpdateDocument([FromRoute] Guid id, [FromBody] DocumentMetadataDto metadata)
     {
+        metadata.Tags = metadata.Tags.DistinctBy(t => t.Id);
         _repository.UpdateMetadata(metadata);
     }
     

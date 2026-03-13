@@ -5,5 +5,5 @@ namespace DocumentManagerModel;
 public interface IDataMigration
 {
     string Name { get; }
-    void Migrate(DocumentMetadataDto document);
+    void Migrate(DataMigrationDao migrationDao);
 }

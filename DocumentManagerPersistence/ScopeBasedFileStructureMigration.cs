@@ -1,5 +1,4 @@
-﻿using DocumentManager;
-using DocumentManagerModel;
+﻿using DocumentManagerModel;
 
 namespace DocumentManagerPersistence;
 
@@ -14,8 +13,27 @@ public class ScopeBasedFileStructureMigration : IDataMigration
         _documentRepository = documentRepository;
     }
 
-    public void Migrate(DocumentMetadataDto document)
+    public void Migrate(DataMigrationDao migrationDao)
     {
-        _documentRepository.UpdateMetadata(document);
+        var documents = _documentRepository.GetAllDocuments();
+        foreach (var doc in documents)
+        {
+            
+            try
+            {
+                _documentRepository.UpdateMetadata(doc);
+            }
+            catch (Exception e)
+            {
+                migrationDao.Errors.Add(new DataMigrationErrorDao
+                {
+                    Id = Guid.NewGuid(),
+                    MigrationName = Name,
+                    DocumentId = doc.Id,
+                    ErrorMessage = e.Message
+                });
+            }
+        }
+        
     }
 }

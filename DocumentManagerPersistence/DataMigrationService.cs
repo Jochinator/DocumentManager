@@ -1,5 +1,4 @@
-﻿using DocumentManager;
-using DocumentManagerModel;
+﻿using DocumentManagerModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -24,34 +23,15 @@ public class DataMigrationService : IHostedService
 
             foreach (var migration in migrations)
             {
-                if (documentRepository.IsMigrationCompleted(migration.Name))
-                    continue;
-
                 var migrationDao = new DataMigrationDao
                 {
                     Name = migration.Name,
                     StartedAt = DateTime.Now
                 };
+                if (documentRepository.IsMigrationCompleted(migration.Name))
+                    continue;
 
-                var documents = documentRepository.GetAllDocuments();
-                foreach (var doc in documents)
-                {
-                    try
-                    {
-                        migration.Migrate(doc);
-                    }
-                    catch (Exception e)
-                    {
-                        migrationDao.Errors.Add(new DataMigrationErrorDao
-                        {
-                            Id = Guid.NewGuid(),
-                            MigrationName = migration.Name,
-                            DocumentId = doc.Id,
-                            ErrorMessage = e.Message
-                        });
-                    }
-                }
-
+                migration.Migrate(migrationDao);
                 migrationDao.Completed = true;
                 migrationDao.CompletedAt = DateTime.Now;
                 documentRepository.SaveMigration(migrationDao);
