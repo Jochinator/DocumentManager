@@ -13,6 +13,8 @@ public class DocumentMetadataDto
     public IEnumerable<TagDto> Tags { get; set; } = new List<TagDto>();
 
     public string SenderName { get; set; } = "";
+    
+    public ContactDto? Contact { get; set; }
 
     public bool Checked { get; set; } = false;
 

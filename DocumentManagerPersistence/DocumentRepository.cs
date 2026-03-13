@@ -10,16 +10,19 @@ public class DocumentRepository
     private readonly string _dataRootFolder;
     private readonly string _dbPath;
     private readonly string _deletedFolder;
-    
+
     private readonly FilePersistence _filePersistence;
     private readonly FilesystemViewService _filesystemViewService;
     private readonly PersistenceDefinitions _definitions;
+    private ContactRepository _contactRepository;
 
-    public DocumentRepository(IOptions<PersistenceDefinitions> definitions, FilePersistence filePersistence, FilesystemViewService filesystemViewService)
+    public DocumentRepository(IOptions<PersistenceDefinitions> definitions, FilePersistence filePersistence,
+        FilesystemViewService filesystemViewService, ContactRepository contactRepository)
     {
         _definitions = definitions.Value;
         _filePersistence = filePersistence;
         _filesystemViewService = filesystemViewService;
+        _contactRepository = contactRepository;
         _dataRootFolder = _definitions.DataRootFolder;
         _deletedFolder = _definitions.DeletedFolder;
         _dbPath = GetCompleteFilePath("Documents.db");
@@ -43,24 +46,25 @@ public class DocumentRepository
         var id = Guid.NewGuid();
         metadata.Id = id;
         metadata.FilePath = _filePersistence.SaveFile(file, metadata.GenerateFileName(), metadata.Scope);
-        
-        using (var db = new DocumentContext{ DbPath = _dbPath })
+
+        using (var db = new DocumentContext { DbPath = _dbPath })
         {
             db.Metadatas.Add(metadata);
             foreach (var tagDao in metadata.Tags.Where(dao => dao.Id != default))
             {
                 db.Tags.Attach(tagDao);
             }
+
             db.SaveChanges();
         }
-        
+
         _filesystemViewService.AddDocumentToView(metadata.ToDto());
         return metadata;
     }
-    
+
     public string GetFilePath(Guid id)
     {
-        using var db = new DocumentContext{ DbPath = _dbPath };
+        using var db = new DocumentContext { DbPath = _dbPath };
         var metadata = db.Metadatas.Single(data => data.Id == id);
         return GetCompleteFilePath(metadata.FilePath);
     }
@@ -72,22 +76,24 @@ public class DocumentRepository
 
     public IEnumerable<DocumentMetadataDto> GetDocuments(string scope)
     {
-        using (var db = new DocumentContext{ DbPath = _dbPath })
-        { 
+        using (var db = new DocumentContext { DbPath = _dbPath })
+        {
             var metadataList = db.Metadatas
                 .Where(dao => dao.Scope == scope)
                 .Include(dao => dao.Tags)
+                .Include(dao => dao.Contact)
                 .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
     }
-    
+
     internal IEnumerable<DocumentMetadataDto> GetAllDocuments()
     {
-        using (var db = new DocumentContext{ DbPath = _dbPath })
-        { 
+        using (var db = new DocumentContext { DbPath = _dbPath })
+        {
             var metadataList = db.Metadatas
                 .Include(dao => dao.Tags)
+                .Include(dao => dao.Contact)
                 .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
@@ -97,7 +103,10 @@ public class DocumentRepository
     {
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
-            var metadataList = db.Metadatas.Where(dao => dao.Scope == scope).Where(dao => EF.Functions.Like(dao.TextContent, $"%{search}%")).Include(dao => dao.Tags)
+            var metadataList = db.Metadatas.Where(dao => dao.Scope == scope)
+                .Where(dao => EF.Functions.Like(dao.TextContent, $"%{search}%"))
+                .Include(dao => dao.Tags)
+                .Include(dao => dao.Contact)
                 .ToList();
             return metadataList.Select(dao => dao.ToDto());
         }
@@ -105,31 +114,40 @@ public class DocumentRepository
 
     public DocumentMetadataDto GetDocument(Guid id)
     {
-        using var db = new DocumentContext{ DbPath = _dbPath };
-        var metadata = db.Metadatas.Include(dao => dao.Tags).Single(data => data.Id == id);
+        using var db = new DocumentContext { DbPath = _dbPath };
+        var metadata = db.Metadatas.Include(dao => dao.Tags)
+            .Include(dao => dao.Contact)
+            .Single(data => data.Id == id);
         return metadata.ToDto();
     }
 
     public DocumentMetadataDto UpdateMetadata(DocumentMetadataDto metadata)
     {
-        using var db = new DocumentContext{ DbPath = _dbPath };
-    
-        var persistedDao = db.Metadatas.Include(dao => dao.Tags).Single(dao => dao.Id == metadata.Id);
-        
+        using var db = new DocumentContext { DbPath = _dbPath };
+
+        var persistedDao = db.Metadatas.Include(dao => dao.Tags)
+            .Include(dao => dao.Contact)
+            .Single(dao => dao.Id == metadata.Id);
+
         var oldMetadata = persistedDao.ToDto();
-    
+
         var newDao = metadata.ToDao("");
         persistedDao.UpdateFromDao(newDao);
-    
+        if (!string.IsNullOrEmpty(persistedDao.Contact?.Name) && (persistedDao.Contact?.Id == null || persistedDao.Contact?.Id == Guid.Empty))
+        {
+            persistedDao.Contact = _contactRepository.GetOrCreate(persistedDao.Contact!.Name).ToDao();
+        }
+
         var newFileName = persistedDao.GenerateFileName();
         var newRelativePath = _filePersistence.GetRelativePath(metadata.Scope, newFileName, newDao.FileExtension);
-    
+
         if (persistedDao.FilePath != newRelativePath)
         {
             var oldFilePath = persistedDao.FilePath;
-            
-            persistedDao.FilePath = _filePersistence.CopyToNewName(metadata.Scope, oldFilePath, persistedDao.GenerateFileName(), metadata.FileExtension);
-            
+
+            persistedDao.FilePath = _filePersistence.CopyToNewName(metadata.Scope, oldFilePath,
+                persistedDao.GenerateFileName(), metadata.FileExtension);
+
             db.SaveChanges();
 
             try
@@ -145,9 +163,9 @@ public class DocumentRepository
         {
             db.SaveChanges();
         }
-        
+
         _filesystemViewService.UpdateDocumentInView(oldMetadata, metadata);
-    
+
         return metadata;
     }
 
@@ -156,22 +174,25 @@ public class DocumentRepository
         DocumentMetadataDto deletedMetadata;
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
-            var metadata = db.Metadatas.Include(dao => dao.Tags).Single(data => data.Id == id);
+            var metadata = db.Metadatas.Include(dao => dao.Tags)
+                .Include(dao => dao.Contact)
+                .Single(data => data.Id == id);
             deletedMetadata = metadata.ToDto();
             try
             {
-                File.Move(GetCompleteFilePath(metadata.FilePath), Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
+                File.Move(GetCompleteFilePath(metadata.FilePath),
+                    Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
             }
             catch (FileNotFoundException e)
             {
                 Console.WriteLine(e);
             }
-            
+
             db.Metadatas.Remove(metadata);
 
             db.SaveChanges();
         }
-        
+
         _filesystemViewService.RemoveDocumentFromView(deletedMetadata);
     }
 
@@ -184,7 +205,7 @@ public class DocumentRepository
             .OrderBy(scope => scope)
             .ToList();
     }
-    
+
     internal bool IsMigrationCompleted(string migrationName)
     {
         using var db = new DocumentContext { DbPath = _dbPath };

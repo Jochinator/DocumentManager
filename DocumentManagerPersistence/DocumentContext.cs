@@ -17,10 +17,14 @@ public class DocumentContext: DbContext
         modelBuilder.Entity<TagDao>()
             .HasIndex(t => t.Value)
             .IsUnique();
+        modelBuilder.Entity<ContactDao>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
     }
 
     public DbSet<DocumentMetadataDao> Metadatas { get; set; }
     public DbSet<TagDao> Tags { get; set; }
     public DbSet<DataMigrationDao> DataMigrations { get; set; }
     public DbSet<DataMigrationErrorDao> DataMigrationErrors { get; set; }
+    public DbSet<ContactDao> Contacts { get; set; }
 }

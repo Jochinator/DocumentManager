@@ -13,6 +13,8 @@ public class DocumentMetadataDao
     public List<TagDao> Tags { get; set; } = new List<TagDao>();
 
     public string SenderName { get; set; } = "";
+    
+    public ContactDao? Contact { get; set; }
 
     public bool Checked { get; set; } = false;
 
