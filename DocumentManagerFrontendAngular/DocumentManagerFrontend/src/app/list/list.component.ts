@@ -1,29 +1,35 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {DocumentMetadata} from "../dataModel/documentMetadata";
+import {DocumentMetadata, DocumentTag} from "../dataModel/documentMetadata";
 import {debounceTime, distinctUntilChanged, Subject, switchMap} from "rxjs";
 import {MatFormField, MatInput, MatLabel, MatSuffix} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {TableModule} from 'primeng/table';
-import {PrimeTemplate} from 'primeng/api';
+import {FilterService, PrimeTemplate} from 'primeng/api';
 import {ActivatedRoute, RouterLink, RouterLinkActive} from '@angular/router';
 import {DatePipe} from '@angular/common';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TagListPipe} from "../tag-list.pipe";
 
 @Component({
     selector: 'app-list',
     templateUrl: './list.component.html',
     styleUrls: ['./list.component.scss'],
-  imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatIcon, TableModule, PrimeTemplate, RouterLinkActive, RouterLink, DatePipe]
+  imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatIcon, TableModule, PrimeTemplate, RouterLinkActive, RouterLink, DatePipe, TagListPipe]
 })
 export class ListComponent {
   public metadatas = signal<DocumentMetadata[]>([]);
   public searchString = signal('');
   private searchSubject = new Subject<string>();
+  tagMatchModes = [{ label: 'Enthält', value: 'tagFilter' }];
 
-  constructor(private client: HttpClient, private route: ActivatedRoute) {
+  constructor(private client: HttpClient, private route: ActivatedRoute, private filterService: FilterService) {
+    this.filterService.register('tagFilter', (value: DocumentTag[], filter: string): boolean => {
+      if (!filter) return true;
+      return value.some(t => t.value.toLowerCase().includes(filter.toLowerCase()));
+    });
     this.route.params.pipe(
       takeUntilDestroyed(),
       switchMap(() => this.client.get<DocumentMetadata[]>('api/Document'))

@@ -4,13 +4,18 @@ export interface DocumentTag {
   isManualOnly?: boolean;
 }
 
+interface Contact {
+  id?: string;
+  name: string;
+}
+
 export interface DocumentMetadata {
   id: string,
   title: string,
   date: Date,
   checked: boolean,
   filePath: string,
-  senderName: string,
+  contact?: Contact,
   contentType: string,
   tags: DocumentTag[]
 }

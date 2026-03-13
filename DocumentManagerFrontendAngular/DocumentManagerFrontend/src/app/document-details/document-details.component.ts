@@ -23,7 +23,7 @@ export class DocumentDetailsComponent {
   form = new FormGroup({
     title: new FormControl(''),
     date: new FormControl<Date | undefined>(undefined),
-    senderName: new FormControl(''),
+    contactName: new FormControl(''),
     tags: new FormControl<DocumentTag[]>([]),
     checked: new FormControl(false)
   });
@@ -45,7 +45,7 @@ export class DocumentDetailsComponent {
       this.form.patchValue({
         title: value.title,
         date: value.date,
-        senderName: value.senderName,
+        contactName: value.contact?.name,
         tags: value.tags,
         checked: value.checked
       });
@@ -59,7 +59,7 @@ export class DocumentDetailsComponent {
         ...metadata,
         title: this.form.value.title,
         date: this.form.value.date,
-        senderName: this.form.value.senderName,
+        contact: {name: this.form.value.contactName},
         tags: this.form.value.tags,
         checked: this.form.value.checked
       };

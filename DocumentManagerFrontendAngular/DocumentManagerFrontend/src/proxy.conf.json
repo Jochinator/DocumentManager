@@ -1,13 +1,13 @@
 {
   "/api": {
-    "target": "http://localhost:5000",
+    "target": "http://172.22.80.1:5000",
     "secure": false,
     "pathRewrite": {"^/api" : "/api"},
     "logLevel":"debug"
   },
 
   "/documents":{
-    "target": "http://localhost:5000",
+    "target": "http://172.22.80.1:5000",
     "secure": false
   }
 }
