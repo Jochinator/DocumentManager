@@ -34,7 +34,7 @@ public class FilesystemViewService
         var documentPath = Path.Combine(_definitions.DataRootFolder, document.FilePath);
         var fileName = Path.GetFileName(document.FilePath);
 
-        CreateSymlink(document.Scope, "Kontakte", document.SenderName, fileName, documentPath);
+        CreateSymlink(document.Scope, "Kontakte", document.Contact?.Name, fileName, documentPath);
         CreateSymlink(document.Scope, "Jahre", document.Date.Year.ToString(), fileName, documentPath);
         CreateSymlink(document.Scope, "Titel", null, fileName, documentPath);
 
@@ -60,7 +60,7 @@ public class FilesystemViewService
 
         var fileName = Path.GetFileName(document.FilePath);
 
-        DeleteSymlink(document.Scope, "Kontakte", document.SenderName, fileName);
+        DeleteSymlink(document.Scope, "Kontakte", document.Contact?.Name, fileName);
         DeleteSymlink(document.Scope, "Jahre", document.Date.Year.ToString(), fileName);
         DeleteSymlink(document.Scope, "Titel", null, fileName);
 

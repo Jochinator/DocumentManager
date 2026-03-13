@@ -5,16 +5,13 @@ namespace DocumentManagerModel;
 public static class FileNameGenerationExtensions
 {
     public static string GenerateFileName(this DocumentMetadataDao dao)
-        => GenerateFileName(dao.Title, dao.SenderName, dao.Date);
-    
-    public static string GenerateFileName(this DocumentMetadataDto dto)
-        => GenerateFileName(dto.Title, dto.SenderName, dto.Date);
-    
-    private static string GenerateFileName(string title, string senderName, DateTime date)
+        => GenerateFileName(dao.Title, dao.Contact?.Name ?? "", dao.Date);
+
+    private static string GenerateFileName(string title, string contactName, DateTime date)
     {
         var datePart = date.ToString("yyMM");
         
-        var contactPart = RemoveInvalidChars(senderName).Replace(" ", "");
+        var contactPart = RemoveInvalidChars(contactName).Replace(" ", "");
         contactPart = contactPart.Length > 10 ? contactPart[..10] : contactPart;
         
         var titlePart = RemoveInvalidChars(title);

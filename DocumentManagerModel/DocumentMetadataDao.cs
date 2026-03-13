@@ -11,8 +11,6 @@ public class DocumentMetadataDao
     public DateTime Date { get; set; } = DateTime.Now;
 
     public List<TagDao> Tags { get; set; } = new List<TagDao>();
-
-    public string SenderName { get; set; } = "";
     
     public ContactDao? Contact { get; set; }
 

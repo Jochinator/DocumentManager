@@ -16,7 +16,6 @@ public static class DocumentMetadataConversionExtensions
             ContentType = dao.ContentType,
             FileExtension = dao.FileExtension,
             FilePath = dao.FilePath,
-            SenderName = dao.SenderName,
             Contact = dao.Contact?.ToDto(),
             Scope = dao.Scope
         };
@@ -34,7 +33,6 @@ public static class DocumentMetadataConversionExtensions
             ContentType = dto.ContentType,
             FileExtension = dto.FileExtension,
             FilePath = dto.FilePath,
-            SenderName = dto.SenderName,
             TextContent = textContent,
             Contact = dto.Contact?.ToDao(),
             Scope = dto.Scope
@@ -56,11 +54,6 @@ public static class DocumentMetadataConversionExtensions
         if (persistedDao.Title != newDao.Title)
         {
             persistedDao.Title = newDao.Title;
-        }
-
-        if (persistedDao.SenderName != newDao.SenderName)
-        {
-            persistedDao.SenderName = newDao.SenderName;
         }
         
         if (persistedDao.Contact?.Id != newDao.Contact?.Id && persistedDao.Contact?.Name != newDao.Contact?.Name)

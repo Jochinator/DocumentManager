@@ -11,8 +11,6 @@ public class DocumentMetadataDto
     public DateTime Date { get; set; } = DateTime.Now;
 
     public IEnumerable<TagDto> Tags { get; set; } = new List<TagDto>();
-
-    public string SenderName { get; set; } = "";
     
     public ContactDto? Contact { get; set; }
 
