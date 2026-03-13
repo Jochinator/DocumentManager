@@ -3,9 +3,15 @@
   @if (type()!=='date') {
     <input (ngModelChange)="emitValue($event)"
            [(ngModel)]="value"
+           [matAutocomplete]="auto"
            [type]="type()"
            [disabled]="disabled"
            matInput/>
+    <mat-autocomplete #auto="matAutocomplete">
+      @for (option of filteredOptions(); track option) {
+        <mat-option [value]="option">{{option}}</mat-option>
+      }
+    </mat-autocomplete>
   } @else {
     <div style="display: flex">
       <input matInput

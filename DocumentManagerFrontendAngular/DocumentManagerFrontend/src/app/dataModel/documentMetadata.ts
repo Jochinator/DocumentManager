@@ -4,7 +4,7 @@ export interface DocumentTag {
   isManualOnly?: boolean;
 }
 
-interface Contact {
+export interface Contact {
   id?: string;
   name: string;
 }

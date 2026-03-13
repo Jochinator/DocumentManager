@@ -3,7 +3,7 @@
     <form [formGroup]="form" class="left">
       <app-input label="Titel" formControlName="title"></app-input>
       <app-input type="date" label="Datum" formControlName="date"></app-input>
-      <app-input label="Kontakt" formControlName="contactName"></app-input>
+      <app-input label="Kontakt" formControlName="contactName" [options]="contacts()"></app-input>
       <app-tag-selection formControlName="tags"></app-tag-selection>
       <mat-checkbox formControlName="checked">Überprüft</mat-checkbox>
       <div class="actions">

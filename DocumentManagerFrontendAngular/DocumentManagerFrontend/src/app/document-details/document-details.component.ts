@@ -1,7 +1,7 @@
 import {Component, computed, signal} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
-import {DocumentMetadata, DocumentTag} from '../dataModel/documentMetadata';
+import {Contact, DocumentMetadata, DocumentTag} from '../dataModel/documentMetadata';
 import {DomSanitizer} from "@angular/platform-browser";
 import {InputComponent} from '../input/input.component';
 import {TagSelectionComponent} from '../tag-selection/tag-selection.component';
@@ -19,6 +19,7 @@ import {switchMap} from "rxjs";
 })
 export class DocumentDetailsComponent {
   metadata = signal<DocumentMetadata | undefined>(undefined);
+  contacts = signal<string[]>([]);
 
   form = new FormGroup({
     title: new FormControl(''),
@@ -37,6 +38,8 @@ export class DocumentDetailsComponent {
   });
 
   constructor(private route: ActivatedRoute, private client: HttpClient, private sanitizer: DomSanitizer, private router: Router) {
+    this.client.get<Contact[]>('api/Contact')
+      .subscribe(contacts => this.contacts.set(contacts.map(contact => contact.name)));
     this.route.params.pipe(
       takeUntilDestroyed(),
       switchMap(params => this.client.get<DocumentMetadata>("api/Document/" + params['id']))
