@@ -33,6 +33,13 @@ public class DocumentProcessor
             {
                 Title = Path.GetFileNameWithoutExtension(filepath),
                 FileExtension = file.FileExtension,
+                ContentType = file.FileExtension.ToLower() switch
+                {
+                    ".pdf" => "application/pdf",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".png" => "image/png",
+                    _ => "application/octet-stream"
+                },
                 Scope = scope
             };
             try
