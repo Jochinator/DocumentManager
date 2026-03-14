@@ -1,4 +1,4 @@
-import {Component, computed, forwardRef, input} from '@angular/core';
+import {Component, computed, forwardRef, input, signal} from '@angular/core';
 import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {
   MatDatepicker,
@@ -26,7 +26,7 @@ export class InputComponent<T extends object | string> implements ControlValueAc
   type = input<'color' | 'date' | 'datetime-local' | 'email' | 'month' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'time' | 'url' | 'week'>('text');
   label = input<string>('');
   options = input<T[]>([]);
-  value: T | undefined = undefined;
+  value = signal<T | undefined>(undefined);
   disabled = false;
 
   private onChange: (value: T | undefined) => void = () => {
@@ -35,7 +35,7 @@ export class InputComponent<T extends object | string> implements ControlValueAc
   };
 
   writeValue(value: T | undefined): void {
-    this.value = value;
+    this.value.set(value);
   }
 
   registerOnChange(fn: (value: T | undefined) => void): void {
@@ -51,23 +51,23 @@ export class InputComponent<T extends object | string> implements ControlValueAc
   }
 
   emitValue($event: any): void {
-    this.value = $event;
-    this.onChange(this.value);
+    this.value.set($event);
+    this.onChange(this.value());
     this.onTouched();
   }
 
   updateDate($event: MatDatepickerInputEvent<T, unknown | null>): void {
     if ($event.value) {
-      this.value = $event.value;
-      this.onChange(this.value);
+      this.value.set($event.value);
+      this.onChange(this.value());
       this.onTouched();
     }
   }
 
   filteredOptions = computed(() => {
-      if (this.value) {
+      if (this.value()) {
         return this.options().filter(o =>
-          o.toString().toLowerCase().includes((this.value!.toString() ?? '').toLowerCase())
+          o.toString().toLowerCase().includes((this.value()!.toString() ?? '').toLowerCase())
         )
       }
       return this.options()

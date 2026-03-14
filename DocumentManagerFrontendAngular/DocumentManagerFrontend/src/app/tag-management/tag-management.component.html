@@ -1,22 +1,24 @@
 <div class="tag-management-wrapper">
   <mat-form-field>
-    <mat-label>Tag auswählen</mat-label>
-    <mat-select [ngModel]="selectedTag()" (ngModelChange)="selectTag($event)">
-      @for (tag of tags(); track tag.id) {
-        <mat-option [value]="tag">{{tag.value}}</mat-option>
+    <mat-label>{{ strategy().itemName }} auswählen</mat-label>
+    <mat-select [ngModel]="selected()" (ngModelChange)="selectManageable($event)">
+      @for (tag of manageables(); track tag.id) {
+        <mat-option [value]="tag">{{ tag.name }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
 
-  @if (selectedTag()) {
+  @if (selected()) {
     <mat-form-field>
-      <mat-label>Tag Name</mat-label>
+      <mat-label>{{ strategy().itemName }} Name</mat-label>
       <input matInput [ngModel]="editValue()" (ngModelChange)="editValue.set($event)"/>
     </mat-form-field>
 
-    <mat-checkbox [ngModel]="editIsManualOnly()" (ngModelChange)="editIsManualOnly.set($event)">
-      Nur manuell vergeben
-    </mat-checkbox>
+    @if (type() === 'tag') {
+      <mat-checkbox [ngModel]="editIsManualOnly()" (ngModelChange)="editIsManualOnly.set($event)">
+        Nur manuell vergeben
+      </mat-checkbox>
+    }
 
     <div class="actions">
       <button mat-raised-button (click)="save()">Speichern</button>

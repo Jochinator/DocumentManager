@@ -2,7 +2,7 @@
   <mat-label>{{label()}}</mat-label>
   @if (type()!=='date') {
     <input (ngModelChange)="emitValue($event)"
-           [(ngModel)]="value"
+           [ngModel]="value()"
            [matAutocomplete]="auto"
            [type]="type()"
            [disabled]="disabled"
@@ -16,7 +16,7 @@
     <div style="display: flex">
       <input matInput
              (dateChange)="updateDate($event)"
-             [value]="value"
+             [value]="value()"
              [matDatepicker]="picker"
              [disabled]="disabled"/>
       <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>

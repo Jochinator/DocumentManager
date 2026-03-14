@@ -11,7 +11,8 @@ export const routes: Routes = [
       {path: 'single-file-import', component: FileUploadComponent},
       {path: 'list', component: ListComponent},
       {path: 'document/:id', component: DocumentDetailsComponent},
-      {path: 'tags', component: TagManagementComponent},
+      {path: 'tags', component: TagManagementComponent, data: { type: 'tag' }},
+      {path: 'contacts', component: TagManagementComponent, data: { type: 'contact' }},
     ]
   }
 ];
