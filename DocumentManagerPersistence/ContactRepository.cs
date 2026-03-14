@@ -1,5 +1,6 @@
 ﻿using DocumentManager;
 using DocumentManagerModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace DocumentManagerPersistence;
@@ -35,6 +36,28 @@ public class ContactRepository
     public ContactDto UpdateContact(ContactDto contact)
     {
         using var db = new DocumentContext { DbPath = _dbPath };
+    
+        var duplicate = db.Contacts
+            .Include(c => c.Metadatas)
+            .FirstOrDefault(c => c.Name == contact.Name && c.Id != contact.Id);
+    
+        if (duplicate != null)
+        {
+            // Merge - alle Dokumente auf den Duplikat-Kontakt umzeigen
+            var contactToMerge = db.Contacts
+                .Include(c => c.Metadatas)
+                .Single(c => c.Id == contact.Id);
+        
+            foreach (var doc in contactToMerge.Metadatas)
+            {
+                doc.Contact = duplicate;
+            }
+        
+            db.Contacts.Remove(contactToMerge);
+            db.SaveChanges();
+            return duplicate.ToDto();
+        }
+    
         var existing = db.Contacts.Single(c => c.Id == contact.Id);
         existing.Name = contact.Name;
         db.SaveChanges();
