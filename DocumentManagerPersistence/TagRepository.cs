@@ -34,6 +34,34 @@ public class TagRepository
     public TagDto UpdateTag(TagDto tag)
     {
         using var db = new DocumentContext { DbPath = _dbPath };
+        
+        var duplicate = db.Tags
+            .Include(c => c.Metadatas)
+            .ThenInclude(m => m.Tags)
+            .FirstOrDefault(t => t.Value == tag.Value && t.Id != tag.Id);
+    
+        if (duplicate != null)
+        {
+            var tagToMerge = db.Tags
+                .Include(c => c.Metadatas)
+                .ThenInclude(m => m.Tags)
+                .Single(t => t.Id == tag.Id);
+        
+            foreach (var doc in tagToMerge.Metadatas)
+            {
+                if (doc.Tags.All(t => t.Id != duplicate.Id))
+                {
+                    doc.Tags.Add(duplicate);    
+                }
+                
+                doc.Tags.Remove(tagToMerge);
+            }
+        
+            db.Tags.Remove(tagToMerge);
+            db.SaveChanges();
+            return duplicate.ToDto();
+        }
+        
         var persistedTag = db.Tags.Single(t => t.Id == tag.Id);
         persistedTag.IsManualOnly = tag.IsManualOnly;
         persistedTag.Value = tag.Value;
