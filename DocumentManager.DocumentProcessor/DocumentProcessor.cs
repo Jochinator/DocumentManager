@@ -7,13 +7,15 @@ public class DocumentProcessor
 {
     private readonly DocumentRepository _documentRepository;
     private readonly TagRepository _tagRepository;
+    private readonly ContactRepository _contactRepository;
     private readonly FilePersistence _filePersistence;
     private readonly FileSystemDocumentFileFactory _fileFactory;
 
-    public DocumentProcessor(DocumentRepository documentRepository, TagRepository tagRepository, FilePersistence filePersistence, FileSystemDocumentFileFactory factory)
+    public DocumentProcessor(DocumentRepository documentRepository, TagRepository tagRepository, ContactRepository contactRepository, FilePersistence filePersistence, FileSystemDocumentFileFactory factory)
     {
         _documentRepository = documentRepository;
         _tagRepository = tagRepository;
+        _contactRepository = contactRepository;
         _filePersistence = filePersistence;
         _fileFactory = factory;
     }
@@ -33,6 +35,7 @@ public class DocumentProcessor
             {
                 Title = Path.GetFileNameWithoutExtension(filepath),
                 FileExtension = file.FileExtension,
+                ImportPath = filepath,
                 ContentType = file.FileExtension.ToLower() switch
                 {
                     ".pdf" => "application/pdf",
@@ -47,7 +50,7 @@ public class DocumentProcessor
                 AddDocumentToDatabase(metadata, file);
                 _filePersistence.RemoveFile(filepath);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 file.HandleError();
                 //TODO protokollieren, dass file nicht importiert werden konnte
@@ -62,6 +65,7 @@ public class DocumentProcessor
     private DocumentMetadataDto AddDocumentToDatabase(DocumentMetadataDto metadata, IDocumentFile file)
     {
         var tagDtos = _tagRepository.GetTags().ToList();
+        var contacts = _contactRepository.GetContacts().ToList();
         
         var textContent = file.GetTextContent();
         
@@ -70,16 +74,11 @@ public class DocumentProcessor
             throw new Exception("File has no TextContent");
         }
         
-        var tagList = new List<TagDto>();
-        foreach (var tagDto in tagDtos.Where(dto => !dto.IsManualOnly))
-        {
-            if (textContent.Contains(tagDto.Value, StringComparison.CurrentCultureIgnoreCase))
-            {
-                tagList.Add(tagDto);
-            }
-        }
+        var tagList = tagDtos.Where(tagDto => tagDto.Rule.ToRule().Apply(metadata, textContent)).ToList();
+        var contact = contacts.FirstOrDefault(contact => contact.Rule.ToRule().Apply(metadata, textContent));
 
         metadata.Tags = tagList;
+        metadata.Contact = contact;
         return _documentRepository
             .CreateDocument(metadata.ToDao(textContent), file).ToDto();
     }

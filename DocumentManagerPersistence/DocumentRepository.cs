@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using DocumentManager;
 using DocumentManagerModel;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +27,7 @@ public class DocumentRepository
         _contactRepository = contactRepository;
         _dataRootFolder = _definitions.DataRootFolder;
         _deletedFolder = _definitions.DeletedFolder;
-        _dbPath = GetCompleteFilePath("Documents.db");
+        _dbPath = GetCompleteFilePath(_definitions.DbName);
     }
 
     public void Init()
@@ -46,6 +48,11 @@ public class DocumentRepository
         var id = Guid.NewGuid();
         metadata.Id = id;
         metadata.FilePath = _filePersistence.SaveFile(file, metadata.GenerateFileName(), metadata.Scope);
+        metadata.Hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(metadata.TextContent)));
+        if (metadata.Contact != null)
+        {
+            metadata.Contact = _contactRepository.GetOrCreate(metadata.Contact.Name).ToDao();    
+        }
 
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
@@ -53,6 +60,10 @@ public class DocumentRepository
             foreach (var tagDao in metadata.Tags.Where(dao => dao.Id != default))
             {
                 db.Tags.Attach(tagDao);
+            }
+            if (metadata.Contact?.Id != default)
+            {
+                db.Contacts.Attach(metadata.Contact);
             }
 
             db.SaveChanges();

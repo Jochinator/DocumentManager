@@ -23,4 +23,5 @@ public class DocumentMetadataDao
     public string ContentType { get; set; } = "";
     
     public string Scope { get; set; } = "default";
+    public string Hash { get; set; } = "";
 }

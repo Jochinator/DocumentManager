@@ -59,7 +59,7 @@ public class DocumentController : ControllerBase
     }
 
     [HttpPost(Name = "Documents")]
-    public Guid ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged)
+    public Guid ImportDocument([FromForm] IFormFile file, [FromForm] string lastChanged, [FromForm] string? relativePath)
     {
         var scope = GetScope();
         
@@ -70,7 +70,8 @@ public class DocumentController : ControllerBase
             Date = DateTime.Parse(lastChanged),
             FileExtension = Path.GetExtension(file.FileName),
             ContentType = file.ContentType,
-            Scope = scope
+            Scope = scope,
+            ImportPath = relativePath
         }, streamDocumentFile).Id;
     }
     

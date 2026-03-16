@@ -8,5 +8,6 @@ public class PersistenceDefinitions
     public string DeletedFolder { get; init; } = "deleted";
     public string FailedFolder { get; init; } = "failed";
     public string ViewFolder { get; init; } = "view";
+    public string DbName { get; init; } = "Documents.db";
     public bool GenerateFilesystemView { get; init; } = false;
 }

@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using DocumentManager.DocumentProcessor;
 using DocumentManagerApi;
 using DocumentManagerModel;
@@ -7,13 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.OperationFilter<SwaggerFileOperationFilter>();
 });
+
 builder.Services.AddScoped<DocumentRepository>();
 builder.Services.AddScoped<TagRepository>();
 builder.Services.AddScoped<ContactRepository>();
@@ -49,11 +56,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.Use(async (HttpContext context, Func<Task> next) =>
+app.Use(async (context, next) =>
 {
     await next.Invoke();
 
-    if (context.Response.StatusCode == 404 && !context.Request.Path.Value.Contains("/api"))
+    if (context.Response.StatusCode == 404 && context.Request.Path.Value != null && !context.Request.Path.Value.Contains("/api"))
     {
         context.Request.Path = new PathString("/index.html");
         await next.Invoke();

@@ -1,5 +1,6 @@
 using DocumentManager;
 using DocumentManagerModel;
+using DocumentManagerModel.Rule;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocumentManagerPersistence;
@@ -27,4 +28,5 @@ public class DocumentContext: DbContext
     public DbSet<DataMigrationDao> DataMigrations { get; set; }
     public DbSet<DataMigrationErrorDao> DataMigrationErrors { get; set; }
     public DbSet<ContactDao> Contacts { get; set; }
+    public DbSet<RuleDao> Rules { get; set; }
 }

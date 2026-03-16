@@ -1,5 +1,6 @@
 ﻿using DocumentManager;
 using DocumentManagerModel;
+using DocumentManagerModel.Rule;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -11,13 +12,21 @@ public class ContactRepository
 
     public ContactRepository(IOptions<PersistenceDefinitions> definitions)
     {
-        _dbPath = Path.Combine(definitions.Value.DataRootFolder, "Documents.db");
+        
+        _dbPath = Path.Combine(definitions.Value.DataRootFolder, definitions.Value.DbName);
     }
 
     public IEnumerable<ContactDto> GetContacts()
     {
         using var db = new DocumentContext { DbPath = _dbPath };
-        return db.Contacts.Select(c => c.ToDto()).ToList();
+        var ruleRepository = new RuleRepository(db);
+        return db.Contacts.Include(c => c.Rule).Select(c => IncludeRule(c, ruleRepository)).Select(c => c.ToDto()).ToList();
+    }
+
+    private static ContactDao IncludeRule(ContactDao c, RuleRepository ruleRepository)
+    {
+        c.Rule = ruleRepository.Load(c.Rule);
+        return c;
     }
 
     public ContactDto GetOrCreate(string name)
@@ -36,6 +45,7 @@ public class ContactRepository
     public ContactDto UpdateContact(ContactDto contact)
     {
         using var db = new DocumentContext { DbPath = _dbPath };
+        var ruleRepository = new RuleRepository(db);
     
         var duplicate = db.Contacts
             .Include(c => c.Metadatas)
@@ -43,7 +53,11 @@ public class ContactRepository
     
         if (duplicate != null)
         {
-            // Merge - alle Dokumente auf den Duplikat-Kontakt umzeigen
+            if (contact.Rule != null)
+            {
+                throw new InvalidOperationException("Merging contacts is not supported, if the removed contact contains a rule.");
+            }
+            
             var contactToMerge = db.Contacts
                 .Include(c => c.Metadatas)
                 .Single(c => c.Id == contact.Id);
@@ -57,9 +71,11 @@ public class ContactRepository
             db.SaveChanges();
             return duplicate.ToDto();
         }
-    
-        var existing = db.Contacts.Single(c => c.Id == contact.Id);
+        
+        var existing = db.Contacts.Include(c => c.Rule).Where(c => c.Id == contact.Id).Select(c => IncludeRule(c, ruleRepository)).Single();
         existing.Name = contact.Name;
+        ruleRepository.Delete(existing.Rule);
+        existing.Rule = ruleRepository.Save(contact.Rule?.ToRuleDao());
         db.SaveChanges();
         return contact;
     }
@@ -67,7 +83,9 @@ public class ContactRepository
     public void DeleteContact(Guid id)
     {
         using var db = new DocumentContext { DbPath = _dbPath };
-        var contact = db.Contacts.Single(c => c.Id == id);
+        var ruleRepository = new RuleRepository(db);
+        var contact = db.Contacts.Include(c => c.Rule).Where(c => c.Id == id).Select(c => IncludeRule(c, ruleRepository)).Single();
+        ruleRepository.Delete(contact.Rule);
         db.Contacts.Remove(contact);
         db.SaveChanges();
     }

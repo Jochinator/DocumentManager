@@ -1,7 +1,6 @@
-using System.Reflection;
 using DocumentManager;
-using DocumentManager.TextExtractor;
 using DocumentManagerModel;
+using DocumentManagerModel.Rule;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +14,7 @@ public class TagRepository
     public TagRepository(IOptions<PersistenceDefinitions> definitions)
     {
         _dataRootFolder = definitions.Value.DataRootFolder;
-        _dbPath = GetCompleteFilePath("Documents.db");
+        _dbPath = GetCompleteFilePath(definitions.Value.DbName);
     }
 
     private string GetCompleteFilePath(string filePath)
@@ -25,16 +24,18 @@ public class TagRepository
 
     public IEnumerable<TagDto> GetTags()
     {
-        using (var db = new DocumentContext{ DbPath = _dbPath })
-        {
-            return db.Tags.Select(dao => dao.ToDto()).ToList();
-        }
+        using var db = new DocumentContext{ DbPath = _dbPath };
+        var ruleRepository = new RuleRepository(db);
+        return db.Tags.Include(t => t.Rule)
+            .Select(t => IncludeRule(t, ruleRepository))
+            .Select(dao => dao.ToDto())
+            .ToList();
     }
     
     public TagDto UpdateTag(TagDto tag)
     {
         using var db = new DocumentContext { DbPath = _dbPath };
-        
+        var ruleRepository = new RuleRepository(db);
         var duplicate = db.Tags
             .Include(c => c.Metadatas)
             .ThenInclude(m => m.Tags)
@@ -42,6 +43,11 @@ public class TagRepository
     
         if (duplicate != null)
         {
+            if (tag.Rule != null)
+            {
+                throw new InvalidOperationException("Merging tags is not supported, if the removed tag contains a rule.");
+            }
+            
             var tagToMerge = db.Tags
                 .Include(c => c.Metadatas)
                 .ThenInclude(m => m.Tags)
@@ -62,9 +68,12 @@ public class TagRepository
             return duplicate.ToDto();
         }
         
-        var persistedTag = db.Tags.Single(t => t.Id == tag.Id);
-        persistedTag.IsManualOnly = tag.IsManualOnly;
+        var persistedTag = db.Tags.Include(t => t.Rule)
+            .Where(t => t.Id == tag.Id)
+            .Select(t => IncludeRule(t, ruleRepository)).Single();
         persistedTag.Value = tag.Value;
+        ruleRepository.Delete(persistedTag.Rule);
+        persistedTag.Rule = ruleRepository.Save(tag.Rule.ToRuleDao());
         db.SaveChanges();
         return tag;
     }
@@ -72,8 +81,17 @@ public class TagRepository
     public void DeleteTag(Guid id)
     {
         using var db = new DocumentContext { DbPath = _dbPath };
-        var tag = db.Tags.Single(t => t.Id == id);
+        var ruleRepository = new RuleRepository(db);
+        var tag = db.Tags.Include(t => t.Rule)
+            .Where(t => t.Id == id).Select(t => IncludeRule(t, ruleRepository)).Single();
+        ruleRepository.Delete(tag.Rule);
         db.Tags.Remove(tag);
         db.SaveChanges();
+    }
+    
+    private static TagDao IncludeRule(TagDao t, RuleRepository ruleRepository)
+    {
+        t.Rule = ruleRepository.Load(t.Rule);
+        return t;
     }
 }
