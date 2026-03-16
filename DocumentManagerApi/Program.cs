@@ -29,10 +29,7 @@ builder.Services.AddScoped<FilePersistence>();
 builder.Services.AddScoped<DocumentProcessor>();
 builder.Services.AddScoped<FileSystemDocumentFileFactory>();
 
-builder.Services.AddHostedService<DataMigrationService>();
-builder.Services.AddScoped<IDataMigration, ScopeBasedFileStructureMigration>();
-builder.Services.AddScoped<IDataMigration, DeduplicateTagsMigration>();
-builder.Services.AddScoped<IDataMigration, SenderNameToContactMigration>();
+builder.Services.AddScoped<DataMigrationService>();
 builder.Services.AddScoped<FilesystemViewService>();
 
 builder.Services.Configure<PersistenceDefinitions>(
@@ -75,8 +72,8 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     Console.WriteLine("initializing document Repository");
-    var documentRepository = scope.ServiceProvider.GetRequiredService<DocumentRepository>();
-    documentRepository.Init();
+    var dataMigrationService = scope.ServiceProvider.GetRequiredService<DataMigrationService>();
+    dataMigrationService.Init();
 }
 
 app.Run();

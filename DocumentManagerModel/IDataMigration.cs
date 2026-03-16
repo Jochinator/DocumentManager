@@ -5,5 +5,6 @@ namespace DocumentManagerModel;
 public interface IDataMigration
 {
     string Name { get; }
-    void Migrate(DataMigrationDao migrationDao);
+    string? RequiredMigration => null;
+    void Migrate(DataMigrationDao migrationDao, string dbPath);
 }
