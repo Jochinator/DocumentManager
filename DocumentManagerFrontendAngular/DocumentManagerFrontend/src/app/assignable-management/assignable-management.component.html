@@ -1,0 +1,34 @@
+<div class="assignable-management-wrapper">
+  <mat-form-field>
+    <mat-label>{{ strategy().assignableName }} auswählen</mat-label>
+    <mat-select [ngModel]="selected()" (ngModelChange)="selectAssignable($event)" [compareWith]="compareAssignables">
+      @for (assignable of assignables(); track assignable.id) {
+        <mat-option [value]="assignable">{{ assignable.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (selected()) {
+    <mat-form-field>
+      <mat-label>{{ strategy().assignableName }} Name</mat-label>
+      <input matInput [ngModel]="editValue()" (ngModelChange)="editValue.set($event)"/>
+    </mat-form-field>
+
+    @if (selected()) {
+      <mat-form-field>
+        <mat-label>Automatische Zuweisungsregel</mat-label>
+        <input matInput [ngModel]="selected()?.rule | toRuleString" readonly/>
+        <button matSuffix mat-icon-button (click)="openRuleEditor()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </mat-form-field>
+    }
+
+    <div class="actions">
+      <button mat-raised-button (click)="save()">Speichern</button>
+      <button mat-raised-button color="warn" (click)="delete()">Löschen</button>
+    </div>
+  }
+
+
+</div>

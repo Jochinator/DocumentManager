@@ -1,0 +1,10 @@
+/* rule-editor-dialog.component.scss */
+mat-dialog-content {
+  min-width: min(1000px, 80vw);
+  min-height: 100px;
+}
+
+mat-dialog-actions {
+  justify-content: flex-end;
+  gap: 8px;
+}

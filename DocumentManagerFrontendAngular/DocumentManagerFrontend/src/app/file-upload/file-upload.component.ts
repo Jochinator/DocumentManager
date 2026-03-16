@@ -31,6 +31,13 @@ export class FileUploadComponent {
       formData.append("file", file);
       formData.append("lastChanged", new Date(file.lastModified).toISOString());
 
+      formData.append("file", file);
+      formData.append("lastChanged", new Date(file.lastModified).toISOString());
+
+      if (file.webkitRelativePath) {
+        formData.append("relativePath", file.webkitRelativePath);
+      }
+
       const upload$ = this.http.post<string>("api/Document", formData).pipe(catchError(_ => {
         alert(file.name + ' konnte nicht importiert werden')
         return of('');

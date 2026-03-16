@@ -1,0 +1,21 @@
+<!-- rule-editor-dialog.component.html -->
+<h2 mat-dialog-title>Regeleditor</h2>
+
+<mat-dialog-content>
+  @if (rule(); as currentRule) {
+    <app-rule-node
+      [rule]="currentRule"
+      (ruleChange)="rule.set($event)"
+      (removed)="rule.set(undefined)">
+    </app-rule-node>
+  } @else {
+    <button mat-button (click)="rule.set({type: 'contentContains', value: ''})">
+      + Regel hinzufügen
+    </button>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button (click)="cancel()">Abbrechen</button>
+  <button mat-raised-button (click)="save()">Übernehmen</button>
+</mat-dialog-actions>

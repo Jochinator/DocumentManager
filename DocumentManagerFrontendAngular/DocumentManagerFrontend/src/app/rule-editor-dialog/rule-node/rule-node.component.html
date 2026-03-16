@@ -1,0 +1,41 @@
+<!-- rule-node.component.html -->
+<div class="rule-node">
+  <select [ngModel]="rule().type" (ngModelChange)="onTypeChange($event)">
+    <option value="contentContains">Text enthält</option>
+    <option value="dateBefore">Datum vor</option>
+    <option value="dateAfter">Datum nach</option>
+    <option value="and">UND</option>
+    <option value="or">ODER</option>
+    <option value="not">NICHT</option>
+    @if (rule().type === 'not') {
+      <option value="unnot">DOCH</option>
+    }
+    <option value="remove">(Teil-)Regel entfernen</option>
+  </select>
+
+  @if (isPredicate()) {
+    @if (rule().type === 'dateBefore' || rule().type === 'dateAfter') {
+      <input type="date" [ngModel]="rule().value"
+             (ngModelChange)="updateValue($event)"/>
+    } @else {
+
+      <input [ngModel]="rule().value" placeholder="Wert"
+             (ngModelChange)="updateValue($event)"/>
+
+    }
+  }
+
+  @if (isComposite() || rule().type === 'not') {
+    <div class="operands">
+      @for (operand of rule().operands; track $index; let i = $index) {
+        <app-rule-node
+          [rule]="operand"
+          (ruleChange)="updateOperand(i, $event)"
+          (removed)="removeOperand(i)">
+        </app-rule-node>
+      }
+    </div>
+  }
+
+
+</div>

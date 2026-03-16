@@ -36,7 +36,7 @@
   </ng-template>
   <ng-template pTemplate="body" let-document>
     <tr>
-      <td>{{document.contact.name}}</td>
+      <td>{{document.contact?.name}}</td>
       <td>{{document.title}}</td>
       <td>{{document.date | date: 'dd.MM.yyyy'}}</td>
       <td>{{document.tags | tagList}}</td>

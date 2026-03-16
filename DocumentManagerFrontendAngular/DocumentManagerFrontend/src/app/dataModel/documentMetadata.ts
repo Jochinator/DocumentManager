@@ -1,12 +1,15 @@
+import {Rule} from "./rule";
+
 export interface DocumentTag {
   id?: string;
   value: string;
-  isManualOnly?: boolean;
+  rule?: Rule;
 }
 
 export interface Contact {
   id?: string;
   name: string;
+  rule?: Rule;
 }
 
 export interface DocumentMetadata {
