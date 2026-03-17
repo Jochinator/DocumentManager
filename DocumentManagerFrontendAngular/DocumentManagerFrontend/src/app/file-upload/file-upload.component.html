@@ -1,4 +1,22 @@
-<input type="file" multiple class="file-upload" (change)="onFileSelected($event)">
+<div class="button">
+  <label class="upload-button">
+    Dateien auswählen
+    <input type="file" multiple (change)="onFileSelected($event)">
+  </label>
+
+  <label class="upload-button">
+    Ordner auswählen
+    <input type="file" webkitdirectory (change)="onFileSelected($event)">
+  </label>
+</div>
+
+<p class="hint">
+  Mit <em>Dateien auswählen</em> können mehrere Dateien gleichzeitig hochgeladen werden.
+  Ordnerbasierte Regeln werden dabei nicht ausgewertet.
+  Mit <em>Ordner auswählen</em> wird die Ordnerstruktur berücksichtigt –
+  allerdings nur ab dem hochgeladenen Ordner abwärts.
+</p>
+
 
 @if (uploadInProgress()) {
   <app-spinner></app-spinner>

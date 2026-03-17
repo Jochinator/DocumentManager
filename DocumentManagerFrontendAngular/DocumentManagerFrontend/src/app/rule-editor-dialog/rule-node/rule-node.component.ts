@@ -15,7 +15,7 @@ export class RuleNodeComponent {
   removed = output<void>();
 
   isPredicate() {
-    return ['contentContains', 'dateBefore', 'dateAfter'].includes(this.rule().type);
+    return ['contentContains', 'dateBefore', 'dateAfter', 'someSuperFolderIs', 'directSuperFolderIs', 'scopeIs'].includes(this.rule().type);
   }
 
   isComposite() {

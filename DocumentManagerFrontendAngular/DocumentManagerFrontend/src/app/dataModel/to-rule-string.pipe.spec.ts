@@ -28,6 +28,21 @@ describe('RuleToStringPipe', () => {
     expect(pipe.transform(rule)).toBe('Datum nach 01.01.2024');
   });
 
+  it('should transform directSuperFolderIs', () => {
+    const rule: Rule = {type: 'directSuperFolderIs', value: 'Folder'};
+    expect(pipe.transform(rule)).toBe('Kommt direkt aus Folder');
+  });
+
+  it('should transform someSuperFolderIs', () => {
+    const rule: Rule = {type: 'someSuperFolderIs', value: 'Folder'};
+    expect(pipe.transform(rule)).toBe('Kommt aus Folder');
+  });
+
+  it('should transform scopeIs', () => {
+    const rule: Rule = {type: 'scopeIs', value: 'scope'};
+    expect(pipe.transform(rule)).toBe('Scope ist scope');
+  });
+
   it('should transform not', () => {
     const rule: Rule = {
       type: 'not',
