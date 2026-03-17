@@ -32,7 +32,7 @@ builder.Services.AddScoped<FileSystemDocumentFileFactory>();
 
 builder.Services.AddScoped<DataMigrationService>();
 builder.Services.AddScoped<FilesystemViewService>();
-builder.Services.AddSingleton<IMessageService, MessageService>();
+
 
 builder.Services.Configure<PersistenceDefinitions>(
     builder.Configuration.GetSection("PersistenceDefinitions"));
@@ -40,6 +40,15 @@ builder.Services.Configure<PersistenceDefinitions>(
 var definitions = builder.Configuration
     .GetSection("PersistenceDefinitions")
     .Get<PersistenceDefinitions>();
+
+builder.Services.AddMessaging(options =>
+{
+    options.DbPath = Path.Combine(definitions!.DataRootFolder, "messaging.db");
+});
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.ShutdownTimeout = TimeSpan.FromSeconds(3);
+});
 
 Directory.CreateDirectory(definitions!.DataRootFolder);
 Directory.CreateDirectory(Path.Combine(definitions.DataRootFolder, definitions.DocumentFolder));
@@ -71,6 +80,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapControllers();
 app.MapMessageEndpoints();
+
 
 using (var scope = app.Services.CreateScope())
 {

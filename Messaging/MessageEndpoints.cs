@@ -22,5 +22,12 @@ public static class MessageEndpoints
                 .Select(m => new SseItem<string>(JsonSerializer.Serialize(m, jsonOptions)));
             return TypedResults.ServerSentEvents(messages);
         });
+        
+        app.MapPost("/api/messages/{id:guid}/acknowledge", 
+            ([FromRoute] Guid id, [FromServices] IMessageService messageService) =>
+            {
+                messageService.Acknowledge(id);
+                return Results.Ok();
+            });
     }
 }

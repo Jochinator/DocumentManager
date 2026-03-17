@@ -1,3 +1,7 @@
 ﻿namespace Messaging;
 
-public record MessageSegment(string Text, string? Url = null);
+public class MessageSegment
+{
+    public string Text { get; set; }
+    public string Url { get; set; }
+}
