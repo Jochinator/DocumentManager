@@ -1,4 +1,5 @@
-import {Injectable, signal} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
+import {HttpClient} from "@angular/common/http";
 
 type MessageSeverity = 'debug' | 'info' | 'warning' | 'error';
 export interface MessageSegment {
@@ -17,6 +18,7 @@ export interface Message {
   providedIn: 'root',
 })
 export class MessageService {
+  private http = inject(HttpClient);
   messages = signal<Message[]>([]);
   private broadcastChannel = new BroadcastChannel('messages');
   private eventSource?: EventSource;
@@ -47,6 +49,7 @@ export class MessageService {
   dismiss(id: string) {
     this.removeMessage(id);
     this.broadcastChannel.postMessage({ type: 'dismiss', id });
+    this.http.post(`api/messages/${id}/acknowledge`, {}).subscribe();
   }
 
   private removeMessage(id: string) {
