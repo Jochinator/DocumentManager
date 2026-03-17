@@ -6,12 +6,13 @@ import {FormsModule} from "@angular/forms";
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from "@angular/material/autocomplete";
 import {ScopeService} from "./scope/scope.service";
 import {AsyncPipe} from "@angular/common";
+import {MessageToastComponent} from "./messaging/message-toast/message-toast.component";
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatFormField, MatLabel, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption, AsyncPipe]
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatFormField, MatLabel, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption, AsyncPipe, MessageToastComponent]
 })
 export class AppComponent {
   private route = inject(ActivatedRoute);
