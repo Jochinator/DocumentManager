@@ -1,5 +1,6 @@
 ﻿using DocumentManagerModel;
 using DocumentManagerPersistence;
+using Messaging;
 
 namespace DocumentManager.DocumentProcessor;
 
@@ -10,14 +11,16 @@ public class DocumentProcessor
     private readonly ContactRepository _contactRepository;
     private readonly FilePersistence _filePersistence;
     private readonly FileSystemDocumentFileFactory _fileFactory;
+    private readonly IMessageService _messageService;
 
-    public DocumentProcessor(DocumentRepository documentRepository, TagRepository tagRepository, ContactRepository contactRepository, FilePersistence filePersistence, FileSystemDocumentFileFactory factory)
+    public DocumentProcessor(DocumentRepository documentRepository, TagRepository tagRepository, ContactRepository contactRepository, FilePersistence filePersistence, FileSystemDocumentFileFactory factory, IMessageService messageService)
     {
         _documentRepository = documentRepository;
         _tagRepository = tagRepository;
         _contactRepository = contactRepository;
         _filePersistence = filePersistence;
         _fileFactory = factory;
+        _messageService = messageService;
     }
     
     public DocumentMetadataDto CreateDocument(DocumentMetadataDto metadata, IDocumentFile file)
@@ -27,6 +30,7 @@ public class DocumentProcessor
 
     public void ImportDocumentsFromFileSystem(string scope)
     {
+        var importedFiles = new List<string>();
         var filesToImport = _filePersistence.GetFilesToImport();
         foreach (var filepath in filesToImport)
         {
@@ -49,17 +53,19 @@ public class DocumentProcessor
             {
                 AddDocumentToDatabase(metadata, file);
                 _filePersistence.RemoveFile(filepath);
+                importedFiles.Add(filepath);
             }
             catch (Exception)
             {
                 file.HandleError();
-                //TODO protokollieren, dass file nicht importiert werden konnte
             }
             finally
             {
+                importedFiles.Add(filepath);
                 file.Dispose();
             }
         }
+        _messageService.SendMessage($"{importedFiles.Count.ToString()} Dateien wurden automatisch importiert.", MessageSeverity.Info);
     }
 
     private DocumentMetadataDto AddDocumentToDatabase(DocumentMetadataDto metadata, IDocumentFile file)
@@ -71,6 +77,7 @@ public class DocumentProcessor
         
         if (textContent == "")
         {
+            _messageService.SendMessage($"{metadata.Title} konnte nicht importiert werden, da keine OCR-Information verfügbar ist.", MessageSeverity.Error);
             throw new Exception("File has no TextContent");
         }
         

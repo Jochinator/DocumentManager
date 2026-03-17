@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dockerfiles", "Dockerfiles"
 		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messaging", "Messaging\Messaging.csproj", "{AA1A239B-A624-4EAB-8B3D-96C93F26C74A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{9A426A1E-0A5D-4879-8602-5844D6DEFE02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A426A1E-0A5D-4879-8602-5844D6DEFE02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A426A1E-0A5D-4879-8602-5844D6DEFE02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA1A239B-A624-4EAB-8B3D-96C93F26C74A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA1A239B-A624-4EAB-8B3D-96C93F26C74A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA1A239B-A624-4EAB-8B3D-96C93F26C74A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA1A239B-A624-4EAB-8B3D-96C93F26C74A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -4,6 +4,7 @@ using DocumentManager.DocumentProcessor;
 using DocumentManagerApi;
 using DocumentManagerModel;
 using DocumentManagerPersistence;
+using Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddScoped<FileSystemDocumentFileFactory>();
 
 builder.Services.AddScoped<DataMigrationService>();
 builder.Services.AddScoped<FilesystemViewService>();
+builder.Services.AddSingleton<IMessageService, MessageService>();
 
 builder.Services.Configure<PersistenceDefinitions>(
     builder.Configuration.GetSection("PersistenceDefinitions"));
@@ -68,6 +70,7 @@ app.UseRouting();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapControllers();
+app.MapMessageEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -75,5 +78,9 @@ using (var scope = app.Services.CreateScope())
     var dataMigrationService = scope.ServiceProvider.GetRequiredService<DataMigrationService>();
     dataMigrationService.Init();
 }
-
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    app.Services.GetRequiredService<IMessageService>()
+        .SendMessage("Server gestartet", MessageSeverity.Debug);
+});
 app.Run();

@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DocumentManager.TextExtractor\DocumentManager.TextExtractor.csproj" />
+      <ProjectReference Include="..\Messaging\Messaging.csproj" />
     </ItemGroup>
 
 </Project>

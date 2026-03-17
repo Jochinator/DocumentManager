@@ -1,7 +1,9 @@
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Text;
 using DocumentManager;
 using DocumentManagerModel;
+using Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -17,14 +19,16 @@ public class DocumentRepository
     private readonly FilesystemViewService _filesystemViewService;
     private readonly PersistenceDefinitions _definitions;
     private ContactRepository _contactRepository;
+    private readonly IMessageService _messageService;
 
     public DocumentRepository(IOptions<PersistenceDefinitions> definitions, FilePersistence filePersistence,
-        FilesystemViewService filesystemViewService, ContactRepository contactRepository)
+        FilesystemViewService filesystemViewService, ContactRepository contactRepository, IMessageService messageService)
     {
         _definitions = definitions.Value;
         _filePersistence = filePersistence;
         _filesystemViewService = filesystemViewService;
         _contactRepository = contactRepository;
+        _messageService = messageService;
         _dataRootFolder = _definitions.DataRootFolder;
         _deletedFolder = _definitions.DeletedFolder;
         _dbPath = GetCompleteFilePath(_definitions.DbName);
@@ -45,6 +49,11 @@ public class DocumentRepository
 
         using (var db = new DocumentContext { DbPath = _dbPath })
         {
+            var duplicate = db.Metadatas.FirstOrDefault(data => data.Hash == metadata.Hash);
+            if (duplicate != null)
+            {
+                _messageService.SendMessage($"{new Link($"/{metadata.Scope}/document/{metadata.Id}", $"{metadata.Title}")} und {new Link($"{duplicate.Scope}/document/{duplicate.Id}", $"{duplicate.Title}")} scheinen Duplikate zu sein.", MessageSeverity.Warning );
+            }
             db.Metadatas.Add(metadata);
             foreach (var tagDao in metadata.Tags.Where(dao => dao.Id != default))
             {
@@ -181,7 +190,7 @@ public class DocumentRepository
             try
             {
                 File.Move(GetCompleteFilePath(metadata.FilePath),
-                    Path.Combine(_deletedFolder, metadata.Id + metadata.FileExtension));
+                    Path.Combine(_dataRootFolder, _deletedFolder, Path.GetFileName(metadata.FilePath)));
             }
             catch (FileNotFoundException e)
             {
