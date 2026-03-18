@@ -9,5 +9,10 @@
   "/documents":{
     "target": "http://172.22.80.1:5000",
     "secure": false
+  },
+
+  "/messaging":{
+    "target": "http://172.22.80.1:5000",
+    "secure": false
   }
 }

@@ -1,0 +1,16 @@
+@for (message of messageService.messages(); track message.id) {
+  <div class="toast" [class]="message.severity.toLowerCase()">
+    <span style="white-space: pre-wrap">
+      @for (segment of message.segments; track $index) {
+        @if (segment.url) {
+          <a [href]="segment.url">{{ segment.text }}</a>
+        } @else {
+          {{ segment.text }}
+        }
+      }
+    </span>
+    <button (click)="messageService.dismiss(message.id)">✕</button>
+  </div>
+}
+
+

@@ -3,7 +3,7 @@ import {MessageService} from "../message.service";
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'app-message-toast',
+  selector: 'app-message-toast2',
   imports: [
     RouterLink
   ],
