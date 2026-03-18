@@ -23,4 +23,9 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="messaging-toast.js" />
+        <EmbeddedResource Include="messaging-toast.css" />
+    </ItemGroup>
+
 </Project>

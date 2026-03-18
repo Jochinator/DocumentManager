@@ -11,6 +11,20 @@ public static class MessageEndpoints
 {
     public static void MapMessageEndpoints(this WebApplication app)
     {
+        app.MapGet("/messaging/main.js", () =>
+        {
+            var assembly = typeof(MessagingExtensions).Assembly;
+            var stream = assembly.GetManifestResourceStream("Messaging.messaging-toast.js");
+            return Results.Stream(stream, "application/javascript");
+        });
+
+        app.MapGet("/messaging/styles.css", () =>
+        {
+            var assembly = typeof(MessagingExtensions).Assembly;
+            var stream = assembly.GetManifestResourceStream("Messaging.messaging-toast.css");
+            return Results.Stream(stream, "text/css");
+        });
+        
         app.MapGet("/api/messages/stream", ([FromServices] IMessageService messageService, CancellationToken ct) =>
         {
             var jsonOptions = new JsonSerializerOptions 
