@@ -3,8 +3,12 @@
     <form [formGroup]="form" class="left">
       <app-input label="Titel" formControlName="title"></app-input>
       <app-input type="date" label="Datum" formControlName="date"></app-input>
-      <app-input label="Kontakt" formControlName="contactName" [options]="contacts()"></app-input>
-      <app-tag-selection formControlName="tags"></app-tag-selection>
+      <app-input label="Kontakt" formControlName="contactName" [options]="contacts().map(c => c.name)">
+        <mat-icon matIconSuffix (click)="openContactEditor()"
+                  style="cursor: pointer">edit
+        </mat-icon>
+      </app-input>
+      <app-tag-selection formControlName="tags" (tagClicked)="openTagEditor($event.id)"></app-tag-selection>
       <mat-checkbox formControlName="checked">Überprüft</mat-checkbox>
       <div class="actions">
         <a [href]="sanitizedDocumentLink()" download mat-raised-button>Dokument runterladen</a>

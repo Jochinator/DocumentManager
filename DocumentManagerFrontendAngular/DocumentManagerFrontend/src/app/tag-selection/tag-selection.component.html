@@ -2,7 +2,7 @@
   <mat-label>Tags:</mat-label>
   <mat-chip-grid #tagChips aria-label="Tag Selection" [formControl]="chipGrid">
     @for (tag of tags(); track tag) {
-      <mat-chip-row (removed)="remove(tag)">
+      <mat-chip-row (click)="this.tagClicked.emit(tag);" (removed)="remove(tag)">
         {{tag.value}}
         <button matChipRemove [attr.aria-label]="'remove ' + tag">
           <mat-icon>cancel</mat-icon>

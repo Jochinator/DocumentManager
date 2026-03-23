@@ -10,16 +10,18 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular
 import {MatButton} from '@angular/material/button';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {switchMap} from "rxjs";
+import {MatIcon} from "@angular/material/icon";
+import {MatSuffix} from "@angular/material/input";
 
 @Component({
   selector: 'app-document-details',
   templateUrl: './document-details.component.html',
   styleUrls: ['./document-details.component.scss'],
-  imports: [InputComponent, TagSelectionComponent, MatCheckbox, FormsModule, ReactiveFormsModule, MatButton]
+  imports: [InputComponent, TagSelectionComponent, MatCheckbox, FormsModule, ReactiveFormsModule, MatButton, MatIcon, MatSuffix]
 })
 export class DocumentDetailsComponent {
   metadata = signal<DocumentMetadata | undefined>(undefined);
-  contacts = signal<string[]>([]);
+  contacts = signal<Contact[]>([]);
 
   form = new FormGroup({
     title: new FormControl(''),
@@ -39,7 +41,7 @@ export class DocumentDetailsComponent {
 
   constructor(private route: ActivatedRoute, private client: HttpClient, private sanitizer: DomSanitizer, private router: Router) {
     this.client.get<Contact[]>('api/Contact')
-      .subscribe(contacts => this.contacts.set(contacts.map(contact => contact.name)));
+      .subscribe(contacts => this.contacts.set(contacts));
     this.route.params.pipe(
       takeUntilDestroyed(),
       switchMap(params => this.client.get<DocumentMetadata>("api/Document/" + params['id']))
@@ -79,5 +81,19 @@ export class DocumentDetailsComponent {
           .subscribe(() => this.router.navigate(['list'], {relativeTo: this.route.parent}));
       }
     }
+  }
+
+  openTagEditor(tagId?: string) {
+    if (tagId){
+      const scope = this.route.snapshot.paramMap.get('scope');
+      window.open(`/${scope}/tags?id=${tagId}`, '_blank', 'width=800,height=600');
+    }
+  }
+
+  openContactEditor() {
+    const contactName = this.form.get('contactName')?.value;
+    const contact = this.contacts().find(c => c.name === contactName);
+    const scope = this.route.snapshot.paramMap.get('scope');
+    window.open(`/${scope}/contacts?id=${contact?.id}`, '_blank', 'width=800,height=600');
   }
 }

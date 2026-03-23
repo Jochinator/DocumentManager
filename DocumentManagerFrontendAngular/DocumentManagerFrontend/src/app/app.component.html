@@ -2,13 +2,16 @@
   <div class="header">
     <h1>Document Manager</h1>
     <nav>
-      <a [routerLink]="['/', scope(), 'list']"
+      <a [routerLink]="['/', scope(), 'redirect']"
+         [queryParams]="{to: '/' + scope() + '/list'}"
          routerLinkActive="active">Document List</a>
       <a [routerLink]="['/', scope(), 'single-file-import']"
          routerLinkActive="active">Import Document</a>
-      <a [routerLink]="['/', scope(), 'tags']"
+      <a [routerLink]="['/', scope(), 'redirect']"
+         [queryParams]="{to: '/' + scope() + '/tags'}"
          routerLinkActive="active">Manage Tags</a>
-      <a [routerLink]="['/', scope(), 'contacts']"
+      <a [routerLink]="['/', scope(), 'redirect']"
+         [queryParams]="{to: '/' + scope() + '/contacts'}"
          routerLinkActive="active">Manage contacts</a>
     </nav>
     <mat-form-field  subscriptSizing="dynamic">

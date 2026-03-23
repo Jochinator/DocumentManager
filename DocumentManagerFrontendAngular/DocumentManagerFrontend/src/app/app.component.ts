@@ -6,6 +6,7 @@ import {FormsModule} from "@angular/forms";
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from "@angular/material/autocomplete";
 import {ScopeService} from "./scope/scope.service";
 import {AsyncPipe} from "@angular/common";
+import {Observable} from "rxjs";
 
 @Component({
     selector: 'app-root',
@@ -20,7 +21,7 @@ export class AppComponent {
   private scopeService = inject(ScopeService);
 
   scope = signal('default');
-  scopes$ = this.scopeService.scopes$;
+  scopes$: Observable<string[]> = this.scopeService.scopes$;
 
   constructor() {
     this.router.events.pipe(
@@ -37,7 +38,7 @@ export class AppComponent {
     if (!newScope) return;
     const urlParts = this.router.url.split('/');
     urlParts[1] = newScope;
-    this.router.navigateByUrl(urlParts.join('/'));
+    void this.router.navigateByUrl(urlParts.join('/'));
   }
 
   onBlur(event: FocusEvent) {

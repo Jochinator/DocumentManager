@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  width: 100%;
+}
+.assignable-details-wrapper{
+  display: flex;
+  flex-direction: row;
+  gap: 60px;
+}
+
+.left {
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.right {
+  margin-top: -60px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+

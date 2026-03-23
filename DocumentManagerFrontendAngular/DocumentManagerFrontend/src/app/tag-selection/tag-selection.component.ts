@@ -1,4 +1,4 @@
-import {Component, ElementRef, forwardRef, signal, viewChild} from '@angular/core';
+import {Component, ElementRef, forwardRef, output, signal, viewChild} from '@angular/core';
 import {COMMA, ENTER} from "@angular/cdk/keycodes";
 import {MatChipGrid, MatChipInput, MatChipInputEvent, MatChipRemove, MatChipRow} from "@angular/material/chips";
 import {
@@ -45,11 +45,12 @@ import {toSignal} from "@angular/core/rxjs-interop";
 export class TagSelectionComponent implements ControlValueAccessor {
   public separatorKeysCodes: number[] = [ENTER, COMMA];
   tags = signal<DocumentTag[]>([]);
+  public tagClicked = output<DocumentTag>()
   private allTags = signal<DocumentTag[]>([]);
 
   tagInput = viewChild.required<ElementRef<HTMLInputElement>>('tagInput');
 
-  chipGrid = new FormControl('', (control: AbstractControl): ValidationErrors | null => {
+  chipGrid = new FormControl('', (_: AbstractControl): ValidationErrors | null => {
     return this.tagCtrl?.value ? {unconfirmed: true} : null;
   });
   tagCtrl = new FormControl('');
@@ -115,7 +116,7 @@ export class TagSelectionComponent implements ControlValueAccessor {
     this.tagCtrl.setValue(null);
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  validate(_: AbstractControl): ValidationErrors | null {
     return this.tagCtrl.value ? { unconfirmed: true } : null;
   }
 

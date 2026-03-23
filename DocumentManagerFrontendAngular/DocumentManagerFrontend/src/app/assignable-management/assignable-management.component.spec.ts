@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AssignableManagementComponent } from './assignable-management.component';
+import {DocumentTag} from "../dataModel/documentMetadata";
 
 describe('TagManagementComponent', () => {
-  let component: AssignableManagementComponent;
-  let fixture: ComponentFixture<AssignableManagementComponent>;
+  let component: AssignableManagementComponent<DocumentTag>;
+  let fixture: ComponentFixture<AssignableManagementComponent<DocumentTag>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

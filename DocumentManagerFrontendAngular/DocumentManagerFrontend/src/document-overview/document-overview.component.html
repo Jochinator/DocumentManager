@@ -1,0 +1,14 @@
+<mat-form-field class="search-form-field">
+  <mat-label>Volltextsuche</mat-label>
+  <input matInput type="text" [ngModel]="searchString()"
+         (ngModelChange)="searchString.set($event)">
+  @if (searchString()) {
+    <button matSuffix mat-icon-button aria-label="Clear" (click)="searchString.set('')">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</mat-form-field>
+
+@if (stateKey()) {
+  <app-document-list [stateKey]="stateKey()" [searchString]="searchString()"/>
+}
