@@ -1,0 +1,35 @@
+<div class="app-wrapper">
+  <div class="header">
+    <h1>Document Manager</h1>
+    <nav>
+      <a [routerLink]="['/', scope(), 'redirect']"
+         [queryParams]="{to: '/' + scope() + '/list'}"
+         routerLinkActive="active">Document List</a>
+      <a [routerLink]="['/', scope(), 'single-file-import']"
+         routerLinkActive="active">Import Document</a>
+      <a [routerLink]="['/', scope(), 'redirect']"
+         [queryParams]="{to: '/' + scope() + '/tags'}"
+         routerLinkActive="active">Manage Tags</a>
+      <a [routerLink]="['/', scope(), 'redirect']"
+         [queryParams]="{to: '/' + scope() + '/contacts'}"
+         routerLinkActive="active">Manage contacts</a>
+    </nav>
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Scope</mat-label>
+      <input matInput
+             [ngModel]="scope()"
+             (ngModelChange)="changeScope($event)"
+             (blur)="onBlur($event)"
+             [matAutocomplete]="auto"/>
+      <mat-autocomplete #auto="matAutocomplete">
+        @for (s of scopes$ | async; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+  <messaging-toast api-base-url=""></messaging-toast>
+</div>

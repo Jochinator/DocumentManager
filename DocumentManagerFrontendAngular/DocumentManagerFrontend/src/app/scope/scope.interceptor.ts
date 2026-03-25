@@ -4,7 +4,17 @@ import {inject} from "@angular/core";
 
 export const scopeInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const scope = router.url.split('/')[1] ?? 'default';
+
+  let route = router.routerState.snapshot.root;
+  let scope = 'default';
+
+  while (route.firstChild) {
+    route = route.firstChild;
+    if (route.params['scope']) {
+      scope = route.params['scope'];
+      break;
+    }
+  }
 
   const scopedReq = req.clone({
     headers: req.headers.set('X-Scope', scope)

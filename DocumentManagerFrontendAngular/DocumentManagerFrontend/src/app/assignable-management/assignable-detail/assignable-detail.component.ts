@@ -49,7 +49,8 @@ export class AssignableDetailComponent {
     private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {
-    this.route.parent?.data.pipe(takeUntilDestroyed()).subscribe(data => {
+    this.route.data.pipe(takeUntilDestroyed()).subscribe(data => {
+      debugger;
       this.type.set(data['type']);
     });
 
@@ -57,6 +58,7 @@ export class AssignableDetailComponent {
       takeUntilDestroyed(),
       switchMap(params => {
         const id = params['id'];
+        debugger;
         return this.strategy().getAssignables().pipe(
           map(assignables => assignables.find(a => a.id === id))
         );

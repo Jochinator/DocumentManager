@@ -10,7 +10,8 @@
          [resizableColumns]="true" styleClass="p-datatable-gridlines"
          [paginator]="true"
          [stateKey]="stateKey()"
-         [stateStorage]="'local'">
+         [stateStorage]="'local'"
+         [filters]="filters()">
   <ng-template pTemplate="caption">
     <div class="table-header">List of Documents</div>
   </ng-template>

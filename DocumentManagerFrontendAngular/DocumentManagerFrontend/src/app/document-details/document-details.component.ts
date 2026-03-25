@@ -86,7 +86,7 @@ export class DocumentDetailsComponent {
   openTagEditor(tagId?: string) {
     if (tagId){
       const scope = this.route.snapshot.paramMap.get('scope');
-      window.open(`/${scope}/tags?id=${tagId}`, '_blank', 'width=800,height=600');
+      window.open(`/window/${scope}/tags/${tagId}`, '_blank', 'width=800,height=600');
     }
   }
 
@@ -94,6 +94,6 @@ export class DocumentDetailsComponent {
     const contactName = this.form.get('contactName')?.value;
     const contact = this.contacts().find(c => c.name === contactName);
     const scope = this.route.snapshot.paramMap.get('scope');
-    window.open(`/${scope}/contacts?id=${contact?.id}`, '_blank', 'width=800,height=600');
+    window.open(`/window/${scope}/contacts/${contact?.id}`, '_blank', 'width=800,height=600');
   }
 }
