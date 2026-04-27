@@ -3,17 +3,15 @@ import {ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet} from
 import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
 import {FormsModule} from "@angular/forms";
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from "@angular/material/autocomplete";
-import {AsyncPipe} from "@angular/common";
 import {ScopeService} from "../../scope/scope.service";
-import {Observable} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-main-layout',
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatFormField, MatLabel, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption, AsyncPipe]
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatFormField, MatLabel, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption]
 })
 export class MainLayoutComponent {
   private route = inject(ActivatedRoute);
@@ -21,7 +19,7 @@ export class MainLayoutComponent {
   private scopeService = inject(ScopeService);
 
   scope = signal('default');
-  scopes$: Observable<string[]> = this.scopeService.scopes$;
+  scopes = toSignal(this.scopeService.scopes$, { initialValue: [] as string[] });
 
   constructor() {
     this.router.events.pipe(

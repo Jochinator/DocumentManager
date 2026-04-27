@@ -22,7 +22,7 @@
              (blur)="onBlur($event)"
              [matAutocomplete]="auto"/>
       <mat-autocomplete #auto="matAutocomplete">
-        @for (s of scopes$ | async; track s) {
+        @for (s of scopes(); track s) {
           <mat-option [value]="s">{{ s }}</mat-option>
         }
       </mat-autocomplete>
